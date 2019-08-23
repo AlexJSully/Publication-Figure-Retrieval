@@ -13,7 +13,7 @@ Chrome | Firefox | IE | Edge | Safari | Opera
 If you would like to run or modify the publication figure web scraping tool locally, clone the repository with git by running the following command:
 
 ```git
-git clone https://github.com/ASully/Publication-Figures-Web-scraping.git
+git clone https://github.com/ASully/Publication-Figures-Web-Scraping.git
 ```
 
 Then run ```npm install```, change to appropriate directory and then ```npm start```. This tool will run at http://localhost:3000/.  
