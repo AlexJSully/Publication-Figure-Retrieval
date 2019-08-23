@@ -1,6 +1,6 @@
-# Publication figure web scrapping
+# Publication figure web scraping
 
-This tool provides a method for scrapping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving the figures from open access and publicly available publications.
+This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.
 
 ## Browser Compatibilities 
 
@@ -10,10 +10,10 @@ Chrome | Firefox | IE | Edge | Safari | Opera
 
 ## Installation/Open
 
-If you would like to run or modify the publication figure web scrapping tool locally, clone the repository with git by running the following command:
+If you would like to run or modify the publication figure web scraping tool locally, clone the repository with git by running the following command:
 
 ```git
-git clone https://github.com/ASully/Publication-Figures-Web-Scrapping.git
+git clone https://github.com/ASully/Publication-Figures-Web-scraping.git
 ```
 
 Then run ```npm install```, change to appropriate directory and then ```npm start```. This tool will run at http://localhost:3000/.  
@@ -22,7 +22,7 @@ The images are downloaded to your local download location that is designated by 
 
 ## Getting Started
 
-Just follow the instructions provided on the localhost page that appears after you run ```npm start```. All you need to do is input an organism and max number of papers you wish to scrape and hit the 'Start scrapping' button.
+Just follow the instructions provided on the localhost page that appears after you run ```npm start```. All you need to do is input an organism and max number of papers you wish to scrape and hit the 'Start scraping' button.
 
 ## Known issues
 

@@ -37,8 +37,8 @@ export default class RetrieveData extends React.Component {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 let response = xhr.responseXML;
                 console.log(response);
-                document.getElementById('progress').innerHTML = 'Starting scrapping';
-                document.getElementById('titleOfPage').innerHTML = 'Starting scrapping';
+                document.getElementById('progress').innerHTML = 'Starting scraping';
+                document.getElementById('titleOfPage').innerHTML = 'Starting scraping';
 
                 // Create a list of PMC publication IDs
                 let tempList = [];
