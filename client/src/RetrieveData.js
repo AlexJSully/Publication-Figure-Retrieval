@@ -74,13 +74,10 @@ export default class RetrieveData extends React.Component {
             // let url = 'https://ncbi.nlm.nih.gov/pubmed/' + pubmedIDList[i];
     
             if (i === pubmedIDList.length - 1) {
-                imgParse(url, pubmedIDList[i], true);
+                imgParse(url, true);
             } else {
-                imgParse(url, pubmedIDList[i]);
+                imgParse(url);
             };
-
-            // document.getElementById('progress').innerHTML = 'Article: ' + i + '/' + pubList.length;
-            // document.getElementById('titleOfPage').innerHTML = 'Article: ' + i + '/' + pubList.length;
         };       
     };
 
@@ -92,10 +89,9 @@ export default class RetrieveData extends React.Component {
 /**
  * Retrieve the image itself separated from the publication website on PubMed
  * @param {String} url URL of the PubMed website for the publication
- * @param {String} pubmedID PMC publication Id for the publication
  * @param {Boolean} final Whether this is the last publication to scrape through or not
  */
-function imgParse(url, pubmedID, final = false) {
+function imgParse(url, final = false) {
     rp(url).then(
         function(html) {
             let doc = new DOMParser().parseFromString(html, 'text/html');
@@ -109,68 +105,67 @@ function imgParse(url, pubmedID, final = false) {
                 };
             };
 
-            var link;
-            var splitLink = url.split('http://localhost:8080/');
-            if (splitLink.length > 1) {
-                link = splitLink[1];
-            } else {
-                link = splitLink[0];
-            }
-            imgData[link] = tempImgList;
-            let imgURL = '';
-            for (var d = 0; d < tempImgList.length; d++) {
-                imgURL = 'http://localhost:8080/https://ncbi.nlm.nih.gov' + tempImgList[d];
-                var imgSplit = tempImgList[d].split('/');
-                var imgName = imgSplit[imgSplit.length - 1];
-
-                var preExistingProgressStatus = document.getElementById('progress').innerHTML.split(',')[0];
-                document.getElementById('progress').innerHTML = 'Image position: ' + d + '/' + tempImgList.length;
-                document.getElementById('titleOfPage').innerHTML = 'Image position: ' + d + '/' + tempImgList.length;
-
-                var data;
-                request.get(imgURL, function (error, response, body) {
-                    if (!error && response.statusCode === 200) {
-                        var urlUsed = response['url'];
-                        var urlSplit = urlUsed.split('/');
-                        var usedPubmedID = 'brokenID';
-                        for (var u = 0; u < urlSplit.length; u++) {
-                            if (urlSplit[u] !== undefined && urlSplit[u] !== '' && isNaN(urlSplit[u]) === false) {
-                                usedPubmedID = urlSplit[u];
-                                break;
+            if (tempImgList !== [] && tempImgList.length > 0) {
+                var link;
+                var splitLink = url.split('http://localhost:8080/');
+                if (splitLink.length > 1) {
+                    link = splitLink[1];
+                } else {
+                    link = splitLink[0];
+                }
+                imgData[link] = tempImgList;
+                let imgURL = '';
+                for (var d = 0; d < tempImgList.length; d++) {
+                    imgURL = 'http://localhost:8080/https://ncbi.nlm.nih.gov' + tempImgList[d];
+                    
+                    document.getElementById('progress').innerHTML = 'Image position: ' + d + '/' + tempImgList.length;
+                    document.getElementById('titleOfPage').innerHTML = 'Image position: ' + d + '/' + tempImgList.length;
+    
+                    var data;
+                    request.get(imgURL, function (error, response, body) {
+                        if (!error && response.statusCode === 200) {
+                            var urlUsed = response['url'];
+                            var urlSplit = urlUsed.split('/');
+                            var usedPubmedID = 'brokenID';
+                            for (var u = 0; u < urlSplit.length; u++) {
+                                if (urlSplit[u] !== undefined && urlSplit[u] !== '' && isNaN(urlSplit[u]) === false) {
+                                    usedPubmedID = urlSplit[u];
+                                    break;
+                                };
                             };
-                        };
-                        var usedImgName = urlSplit[urlSplit.length - 1];
-
-                        console.log(urlUsed);
-                        data = "data:" + response.headers["content-type"] + ";base64," + new Buffer(body).toString('base64');
-
-                        // This will download the image
-                        document.getElementById('imgTest').src = data;
-                        document.getElementById('imgLinkTest').href = data;
-                        var filename = usedPubmedID + '-' + usedImgName;
-                        document.getElementById('imgLinkTest').download = filename;
-                        document.getElementById('imgLinkTest').innerHTML = urlUsed;
-                        document.getElementById('imgLinkTest').click();
-                    }
-                });
-
-                // Stop process if this is true
-                if (final === true) {
-                    // console.log(imgData);
-                    document.getElementById('progress').innerHTML = 'Done';
-                    document.getElementById('titleOfPage').innerHTML = 'Done';
+                            var usedImgName = urlSplit[urlSplit.length - 1];
+    
+                            // console.log(urlUsed);
+                            data = "data:" + response.headers["content-type"] + ";base64," + new Buffer(body).toString('base64');
+    
+                            // This will download the image
+                            document.getElementById('imgTest').src = data;
+                            document.getElementById('imgLinkTest').href = data;
+                            var filename = usedPubmedID + '-' + usedImgName;
+                            document.getElementById('imgLinkTest').download = filename;
+                            document.getElementById('imgLinkTest').innerHTML = urlUsed;
+                            document.getElementById('imgLinkTest').click();
+                        }
+                    });
+    
+                    // Stop process if this is true
+                    if (final === true) {
+                        // console.log(imgData);
+                        document.getElementById('progress').innerHTML = 'Done';
+                        document.getElementById('titleOfPage').innerHTML = 'Done';
+                    };
                 };
             };
 
             if (tempImgList.length === 0 && final === true) {
                 console.log(imgData);
-                    document.getElementById('progress').innerHTML = 'Done';
-                    document.getElementById('titleOfPage').innerHTML = 'Done';
+                document.getElementById('progress').innerHTML = 'Done';
+                document.getElementById('titleOfPage').innerHTML = 'Done';
             };
         }
     ).catch(
         function(err) {
             console.log(err);
         }
-    )
+    );
 };
