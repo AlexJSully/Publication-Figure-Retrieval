@@ -29,7 +29,7 @@ export default class App extends React.Component {
         </div>
         <br />
         <div id="imageContainer">
-          <img id="imgTest" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg/220px-An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg" alt="Testing whether internet connection exists or not. No internet means script will fail" />
+          <img id="imgTest" className="fixedImg" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg/220px-An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg" alt="Testing whether internet connection exists or not. No internet means script will fail" />
           <br /><br />
           <p id="progress">Progress will display here with current image link in the process below</p>
           <a id="imgLinkTest" href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg/220px-An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg" atl="download link" target="_blank" rel="noopener noreferrer">https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg/220px-An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg</a>

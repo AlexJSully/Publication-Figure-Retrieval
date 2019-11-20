@@ -1,6 +1,7 @@
 /* eslint-disable no-loop-func */
 import React from 'react';
 const rp = require('request-promise');
+var request = require('request').defaults({ encoding: null });
 let pubList = [];
 let imgData = {};
 
@@ -68,8 +69,9 @@ export default class RetrieveData extends React.Component {
         console.log('Starting to retrieve figures');
         
         for (var i = 0; i < pubmedIDList.length; i++) {
-            let corsProxy = 'https://cors-anywhere.herokuapp.com/';
+            let corsProxy = 'http://localhost:8080/';
             let url = corsProxy + 'https://ncbi.nlm.nih.gov/pubmed/' + pubmedIDList[i];
+            // let url = 'https://ncbi.nlm.nih.gov/pubmed/' + pubmedIDList[i];
     
             if (i === pubmedIDList.length - 1) {
                 imgParse(url, pubmedIDList[i], true);
@@ -77,8 +79,8 @@ export default class RetrieveData extends React.Component {
                 imgParse(url, pubmedIDList[i]);
             };
 
-            document.getElementById('progress').innerHTML = 'Article: ' + i + '/' + pubList.length;
-            document.getElementById('titleOfPage').innerHTML = 'Article: ' + i + '/' + pubList.length;
+            // document.getElementById('progress').innerHTML = 'Article: ' + i + '/' + pubList.length;
+            // document.getElementById('titleOfPage').innerHTML = 'Article: ' + i + '/' + pubList.length;
         };       
     };
 
@@ -107,26 +109,54 @@ function imgParse(url, pubmedID, final = false) {
                 };
             };
 
-            let link = url.split('https://cors-anywhere.herokuapp.com/')[1];
+            var link;
+            var splitLink = url.split('http://localhost:8080/');
+            if (splitLink.length > 1) {
+                link = splitLink[1];
+            } else {
+                link = splitLink[0];
+            }
             imgData[link] = tempImgList;
             let imgURL = '';
             for (var d = 0; d < tempImgList.length; d++) {
-                imgURL = 'https://ncbi.nlm.nih.gov' + tempImgList[d];
-                console.log('Completed the following image at position: ' + d + '/' + tempImgList.length + ', ' + pubList.indexOf(pubmedID) + '/' + pubList.length);
-                console.log(imgURL);
+                imgURL = 'http://localhost:8080/https://ncbi.nlm.nih.gov' + tempImgList[d];
+                var imgSplit = tempImgList[d].split('/');
+                var imgName = imgSplit[imgSplit.length - 1];
 
                 var preExistingProgressStatus = document.getElementById('progress').innerHTML.split(',')[0];
-                document.getElementById('progress').innerHTML = preExistingProgressStatus + ', Image position: ' + d + '/' + tempImgList.length;
-                document.getElementById('titleOfPage').innerHTML = preExistingProgressStatus + ', Image position: ' + d + '/' + tempImgList.length;
+                document.getElementById('progress').innerHTML = 'Image position: ' + d + '/' + tempImgList.length;
+                document.getElementById('titleOfPage').innerHTML = 'Image position: ' + d + '/' + tempImgList.length;
 
-                // This will download the image
-                document.getElementById('imgLinkTest').href = imgURL;
-                document.getElementById('imgLinkTest').innerHTML = imgURL;
-                document.getElementById('imgLinkTest').click();
+                var data;
+                request.get(imgURL, function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        var urlUsed = response['url'];
+                        var urlSplit = urlUsed.split('/');
+                        var usedPubmedID = 'brokenID';
+                        for (var u = 0; u < urlSplit.length; u++) {
+                            if (urlSplit[u] !== undefined && urlSplit[u] !== '' && isNaN(urlSplit[u]) === false) {
+                                usedPubmedID = urlSplit[u];
+                                break;
+                            };
+                        };
+                        var usedImgName = urlSplit[urlSplit.length - 1];
+
+                        console.log(urlUsed);
+                        data = "data:" + response.headers["content-type"] + ";base64," + new Buffer(body).toString('base64');
+
+                        // This will download the image
+                        document.getElementById('imgTest').src = data;
+                        document.getElementById('imgLinkTest').href = data;
+                        var filename = usedPubmedID + '-' + usedImgName;
+                        document.getElementById('imgLinkTest').download = filename;
+                        document.getElementById('imgLinkTest').innerHTML = urlUsed;
+                        document.getElementById('imgLinkTest').click();
+                    }
+                });
 
                 // Stop process if this is true
                 if (final === true) {
-                    console.log(imgData);
+                    // console.log(imgData);
                     document.getElementById('progress').innerHTML = 'Done';
                     document.getElementById('titleOfPage').innerHTML = 'Done';
                 };

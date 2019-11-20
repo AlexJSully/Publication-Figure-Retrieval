@@ -1,33 +1,24 @@
 {
-  "name": "publication-figure-web-scraping",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4"
-  },
+  "name": "publication-figure-web-scrapping",
+  "version": "1.0.0",
+  "description": "This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.",
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"cd server && node private-server.js\" \"cd client && npm start\""
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ASully/Publication-Figures-Web-Scrapping.git"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ASully/Publication-Figures-Web-Scrapping/issues"
+  },
+  "homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme",
+  "dependencies": {
+    "concurrently": "^5.0.0"
   }
 }

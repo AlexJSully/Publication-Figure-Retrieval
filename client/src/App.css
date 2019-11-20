@@ -6,3 +6,7 @@ body {
 a {
   color: turquoise;
 }
+
+.fixedImg {
+  width: 200px;
+}

@@ -16,7 +16,7 @@ If you would like to run or modify the publication figure web scraping tool loca
 git clone https://github.com/ASully/Publication-Figures-Web-Scraping.git
 ```
 
-Then run ```npm install```, change to appropriate directory and then ```npm start```. This tool will run at http://localhost:3000/.  
+Then run ```npm install``` within the host, client and server directories, then change to appropriate directory and then ```npm start```. This tool will run at http://localhost:3000/ (you will need port 3000 and 8080 free).  
 
 The images are downloaded to your local download location that is designated by your browser you decide to run this tool on.
 
