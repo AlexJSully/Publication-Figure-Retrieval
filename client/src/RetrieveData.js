@@ -207,6 +207,7 @@ export default class RetrieveData extends React.Component {
             ).catch(
                 function(err) {
                     console.log(err);
+                    totalCount += 1;
                 }
             );
         };
