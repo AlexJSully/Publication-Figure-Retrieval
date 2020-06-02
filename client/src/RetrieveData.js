@@ -1,7 +1,6 @@
 /* eslint-disable no-loop-func */
 import React from 'react';
 const rp = require('request-promise');
-let pubList = [];
 
 /**
  * Retrieves data from PubMed on publications available based on an organism and scrape the figures from those publications
@@ -19,8 +18,9 @@ export default class RetrieveData extends React.Component {
         this.indexPos = 0;
         /** Maximum number of papers available for a species, designated using RetrieveData.retrieveMaxPaperCount() */
         this.maxPapers = 0;
-        /** List of PubMed publication IDs that are being scraped through */
+        /** List of PubMed and PMC publication IDs that are being scraped through */
         this.pubmedIDList = [];
+        this.pmcIDList = [];
     };
 
     /**
@@ -55,7 +55,7 @@ export default class RetrieveData extends React.Component {
         const xhr = new XMLHttpRequest();
 
         let db = 'pubmed';
-        pubList = [];
+        let pubList = [];
 
         let base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
         let url = base + 'esearch.fcgi?db=' + db + '&term=' + organism + '[Organism]&usehistory=y&retmax=' + retmax;
@@ -86,7 +86,46 @@ export default class RetrieveData extends React.Component {
                 console.log('pubmedIDList', this.pubmedIDList);
 
                 if (this.pubmedIDList !== [] || this.pubmedIDList.length === 0) {
-                    this.retrieveFigures(this.pubmedIDList);
+                    this.retrieveArticleInfo(this.pubmedIDList);
+                };
+            };
+       };
+
+       xhr.open('GET', url, true);
+       xhr.send();
+    };
+
+    async retrieveArticleInfo(pubMedIDList) {
+        const xhr = new XMLHttpRequest();
+
+        let db = 'pubmed';
+
+        let base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
+        let url = base + 'efetch.fcgi?db=' + db + '&id=[' + pubMedIDList + ']&retmode=xml';
+
+        xhr.responseType = 'document';
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                let response = xhr.responseXML;
+                document.getElementById('progress').innerHTML = 'Retrieving article information';
+                document.getElementById('titleOfPage').innerHTML = 'Retrieving article information';
+
+                // Create a list of PMC publication IDs
+                if (response && response.querySelectorAll('[IdType="pmc"]')) {
+                    let pmcList = response.querySelectorAll('[IdType="pmc"]');
+                    for (var i = 0; i < pmcList.length; i++) {
+                        if (pmcList[i]['innerHTML']) {
+                            this.pmcIDList.push(pmcList[i]['innerHTML']);
+                        };
+                    };
+                };
+
+                console.log('pmcIDList', this.pmcIDList);
+
+                if (this.pmcIDList === [] || this.pmcIDList.length === 0 || this.pmcIDList === undefined) {
+                    moveToNextIndexRange(this.organism, this.retmax, this.indexRange, this.indexPos);
+                } else {
+                    this.retrieveFigures(this.pmcIDList);
                 };
             };
        };
@@ -96,38 +135,57 @@ export default class RetrieveData extends React.Component {
     };
 
     /**
-     * Retrieve figures from the publication in the the list provided in pubmedIDList
-     * @param {Array} pubmedIDList A list of PMC publication IDs that will be scraped through to retrieve figures from, a default one of '31307397' is provided for manual testing purposes
+     * Retrieve figures from the publication in the the list provided in pmcIDList
+     * @param {Array} pmcIDList A list of PMC publication IDs that will be scraped through to retrieve figures from, a default one of '31307397' is provided for manual testing purposes
      */
-    async retrieveFigures(pubmedIDList = this.pubmedIDList) {
+    async retrieveFigures(pmcIDs = this.pmcIDList) {
         document.getElementById('progress').innerHTML = 'Starting to retrieve figures';
         document.getElementById('titleOfPage').innerHTML = 'Starting to retrieve figures';
         console.log('Starting to retrieve figures');
 
         var totalCount = 0;
         
-        for (var i = 0; i < pubmedIDList.length; i++) {
-            let url = 'http://localhost:8080/https://ncbi.nlm.nih.gov/pubmed/' + pubmedIDList[i];
+        for (var i = 0; i < pmcIDs.length; i++) {
+            let url = 'http://localhost:8080/https://www.ncbi.nlm.nih.gov/pmc/articles/' + pmcIDs[i];
     
             rp(url).then(
                 async html => {
+                    var figureImg, link;
                     var pubMedURL = url.split('/');
                     var pubMedID = pubMedURL[pubMedURL.length - 1];
 
                     let doc = new DOMParser().parseFromString(html, 'text/html');
         
-                    let imgList = doc.getElementsByClassName('figure-thumb');
-                    for (var p = 0; p < imgList.length; p++) {
-                        document.getElementById('progress').innerHTML = 'Figure: ' + (p + 1) + ' from: ' + pubMedID;
-                        document.getElementById('titleOfPage').innerHTML = 'Figure: ' + (p + 1) + ' from: ' + pubMedID;
+                    let imgList = doc.getElementsByClassName('titleshop');
+                    for (var t = 0; t < imgList.length; t++) {
+                        document.getElementById('progress').innerHTML = 'Figure (titleshop): ' + (t + 1) + ' from: ' + pubMedID;
+                        document.getElementById('titleOfPage').innerHTML = 'Figure (titleshop): ' + (t + 1) + ' from: ' + pubMedID;
 
                         // Go through the publications and see if any figures exist 
-                        var imgHead = imgList[p];
-                        if (imgHead.getAttribute('src')) {
-                            var figureImg = imgHead.getAttribute('src');
+                        var imgHeadT = imgList[t];
+                        if (imgHeadT.getAttribute('src')) {
+                            figureImg = 'https://www.ncbi.nlm.nih.gov/' + imgHeadT.getAttribute('src');
 
                             // Generate download DOM for the figures
-                            var link = document.createElement('a');
+                            link = document.createElement('a');
+                            link.className = 'imageToDownload';
+                            link.href = figureImg;
+                            document.body.appendChild(link);
+                        };
+                    };
+
+                    imgList = doc.getElementsByClassName('fig-image');
+                    for (var fi = 0; fi < imgList.length; fi++) {
+                        document.getElementById('progress').innerHTML = 'Figure (fig-image): ' + (fi + 1) + ' from: ' + pubMedID;
+                        document.getElementById('titleOfPage').innerHTML = 'Figure (fig-image): ' + (fi + 1) + ' from: ' + pubMedID;
+
+                        // Go through the publications and see if any figures exist 
+                        var imgHeadFI = imgList[fi];
+                        if (imgHeadFI.getAttribute('src')) {
+                            figureImg = 'https://www.ncbi.nlm.nih.gov/' + imgHeadFI.getAttribute('src');
+
+                            // Generate download DOM for the figures
+                            link = document.createElement('a');
                             link.className = 'imageToDownload';
                             link.href = figureImg;
                             document.body.appendChild(link);
@@ -136,7 +194,7 @@ export default class RetrieveData extends React.Component {
                         
                     totalCount += 1;
 
-                    if (totalCount === pubmedIDList.length) {
+                    if (totalCount === pmcIDs.length) {
                         // Begin downloading images
                         console.log('Begin downloading images');
 
@@ -218,13 +276,7 @@ async function iterateFigures(indexPos, indexRange, retmax, organism, currentPos
     } else if (currentPos >= imagesToDownload.length) {
         // If done iterating and downloading images, do to the next index range of publications
         if ((indexPos + indexRange) < retmax) {
-            console.log('Moving to next range of publications');
-
-            document.getElementById('progress').innerHTML = 'Moving to next range of publications';
-            document.getElementById('titleOfPage').innerHTML = 'Moving to next range of publications';
-
-            var newURL = window.location.origin + window.location.pathname + '?organism=' + organism + '&retmax=' + retmax + '&indexRange=' + indexRange + '&indexPos=' + (indexPos + indexRange);
-            window.location.href = newURL;
+            moveToNextIndexRange(organism, retmax, indexRange, indexPos)
         } else {
             // Do nothing, now complete
             console.log('Done');
@@ -234,3 +286,13 @@ async function iterateFigures(indexPos, indexRange, retmax, organism, currentPos
         };
     };
 };
+
+async function moveToNextIndexRange(organism, retmax, indexRange, indexPos) {
+    console.log('Moving to next range of publications');
+
+    document.getElementById('progress').innerHTML = 'Moving to next range of publications';
+    document.getElementById('titleOfPage').innerHTML = 'Moving to next range of publications';
+
+    var newURL = window.location.origin + window.location.pathname + '?organism=' + organism + '&retmax=' + retmax + '&indexRange=' + indexRange + '&indexPos=' + (indexPos + indexRange);
+    window.location.href = newURL;
+}
