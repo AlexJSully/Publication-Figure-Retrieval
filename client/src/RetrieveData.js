@@ -191,6 +191,24 @@ export default class RetrieveData extends React.Component {
                             document.body.appendChild(link);
                         };
                     };
+
+                    imgList = doc.getElementsByClassName('tileshop');
+                    for (var fi = 0; fi < imgList.length; fi++) {
+                        document.getElementById('progress').innerHTML = 'Figure (tileshop): ' + (fi + 1) + ' from: ' + pubMedID;
+                        document.getElementById('titleOfPage').innerHTML = 'Figure (tileshop): ' + (fi + 1) + ' from: ' + pubMedID;
+
+                        // Go through the publications and see if any figures exist 
+                        var imgHeadFI = imgList[fi];
+                        if (imgHeadFI.getAttribute('src')) {
+                            figureImg = 'https://www.ncbi.nlm.nih.gov/' + imgHeadFI.getAttribute('src');
+
+                            // Generate download DOM for the figures
+                            link = document.createElement('a');
+                            link.className = 'imageToDownload';
+                            link.href = figureImg;
+                            document.body.appendChild(link);
+                        };
+                    };
                         
                     totalCount += 1;
 
@@ -225,15 +243,15 @@ export default class RetrieveData extends React.Component {
         // Correct formatting of the species name
         var speciesUse = species.split('_').join('+');
         speciesUse = speciesUse.split(' ').join('+'); 
-        let url = 'http://localhost:8080/https://pubmed.ncbi.nlm.nih.gov/?term=' + speciesUse;
+        let url = 'http://localhost:8080/https://www.ncbi.nlm.nih.gov/pmc/?term=' + speciesUse + '%5BOrganism%5D';
     
         await rp(url).then(
             html => {
                 let doc = new DOMParser().parseFromString(html, 'text/html');
     
-                let maxPapersContainer = doc.getElementsByClassName('value');
-                if (maxPapersContainer[0] && maxPapersContainer[0].innerHTML) {
-                    this.maxPapers = parseInt(maxPapersContainer[0].innerHTML.split(',').join(''));
+                let maxPapersContainer = doc.getElementById('resultcount');
+                if (maxPapersContainer && maxPapersContainer.value) {
+                    this.maxPapers = parseInt(maxPapersContainer.value.trim());
                 };
 
                 return this.maxPapers;
