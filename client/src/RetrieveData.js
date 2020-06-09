@@ -193,14 +193,14 @@ export default class RetrieveData extends React.Component {
                     };
 
                     imgList = doc.getElementsByClassName('tileshop');
-                    for (var fi = 0; fi < imgList.length; fi++) {
-                        document.getElementById('progress').innerHTML = 'Figure (tileshop): ' + (fi + 1) + ' from: ' + pubMedID;
-                        document.getElementById('titleOfPage').innerHTML = 'Figure (tileshop): ' + (fi + 1) + ' from: ' + pubMedID;
+                    for (var ts = 0; ts < imgList.length; ts++) {
+                        document.getElementById('progress').innerHTML = 'Figure (tileshop): ' + (ts + 1) + ' from: ' + pubMedID;
+                        document.getElementById('titleOfPage').innerHTML = 'Figure (tileshop): ' + (ts + 1) + ' from: ' + pubMedID;
 
                         // Go through the publications and see if any figures exist 
-                        var imgHeadFI = imgList[fi];
-                        if (imgHeadFI.getAttribute('src')) {
-                            figureImg = 'https://www.ncbi.nlm.nih.gov/' + imgHeadFI.getAttribute('src');
+                        var imgHeadTS = imgList[ts];
+                        if (imgHeadTS.getAttribute('src')) {
+                            figureImg = 'https://www.ncbi.nlm.nih.gov/' + imgHeadTS.getAttribute('src');
 
                             // Generate download DOM for the figures
                             link = document.createElement('a');
