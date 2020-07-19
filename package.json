@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme",
   "dependencies": {
-    "acorn": ">=6.4.1",
+    "acorn": "^7.3.1",
     "concurrently": "^5.2.0",
     "minimist": ">=1.2.3",
     "serialize-javascript": "^3.1.0"
