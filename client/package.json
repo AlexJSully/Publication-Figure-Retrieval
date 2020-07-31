@@ -7,7 +7,7 @@
     "react-dom": "^16.13.1",
     "react-scripts": "^3.4.1",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "request-promise": "^4.2.6"
   },
   "scripts": {
     "start": "react-scripts start",
