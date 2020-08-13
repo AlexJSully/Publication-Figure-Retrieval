@@ -290,7 +290,7 @@ async function iterateFigures(indexPos, indexRange, retmax, organism, currentPos
 
         // Iterate
         setTimeout(async function() { 
-            let waitingAgain = await iterateFigures(indexPos, indexRange, retmax, organism, currentPos + 1);
+            await iterateFigures(indexPos, indexRange, retmax, organism, currentPos + 1);
         }, 250); // Any image that takes longer than 250ms to load will fail to download
     } else if (currentPos >= imagesToDownload.length) {
         // If done iterating and downloading images, do to the next index range of publications
