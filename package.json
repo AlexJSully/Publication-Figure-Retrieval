@@ -4,7 +4,6 @@
   "description": "This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"cd server && node private-server.js\" \"cd client && npm start\""
   },
   "repository": {
