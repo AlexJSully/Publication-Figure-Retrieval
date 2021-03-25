@@ -1,26 +1,38 @@
 {
   "name": "publication-figure-web-scrapping",
+  "contributors": [
+    {
+      "name": "Alexander Sullivan",
+      "email": "alexander.j.sullivan@hotmail.com",
+      "url": "https://twitter.com/AlexJSully"
+    }
+  ],
   "version": "1.0.0",
+  "private": true,
   "description": "This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.",
-  "main": "index.js",
-  "scripts": {
-    "start": "concurrently \"cd server && node private-server.js\" \"cd client && npm start\""
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ASully/Publication-Figures-Web-Scrapping.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ASully/Publication-Figures-Web-Scrapping/issues"
-  },
-  "homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme",
   "dependencies": {
     "acorn": "^8.1.0",
     "concurrently": "^6.0.0",
     "minimist": "^1.2.5",
     "serialize-javascript": "^5.0.1"
-  }
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"cd server && node private-server.js\" \"cd client && npm start\""
+  },
+  "bugs": {
+    "url": "https://github.com/ASully/Publication-Figures-Web-Scrapping/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ASully/Publication-Figures-Web-Scrapping.git"
+  },
+  "keywords": [
+    "science",
+    "bioinformatics", 
+    "web-scraping",
+    "publication-data"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme"
 }
