@@ -4,9 +4,9 @@ This tool provides a method for scraping through NCBI's [PubMed](https://www.ncb
 
 ## Browser Compatibilities 
 
-Chrome | Firefox | IE | Edge | Safari | Opera
---- | --- | --- | --- | --- | --- |
-✔ |  ? | X |  ? | ? |  ✔ |
+Chrome | Firefox | IE | Edge | Safari | Opera | Tor | Mobile |
+--- | --- | --- | --- | --- | --- | --- | --- |
+✔ |  ? | X |  ? | ? |  ✔ | ✔ | ? |
 
 ## Installation/Open
 
