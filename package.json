@@ -11,7 +11,7 @@
   "private": true,
   "description": "This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.",
   "dependencies": {
-    "concurrently": "^6.4.0"
+    "concurrently": "^6.5.0"
   },
   "main": "index.js",
   "scripts": {
