@@ -147,6 +147,7 @@ export async function retrieveFigures(data) {
 					/** Publication class names */
 					let domClasses = {
 						title: "content-title",
+						abstract: "tsec sec",
 						figures: ["tileshop", "fig-image", "titleshop"],
 					};
 
@@ -170,9 +171,35 @@ export async function retrieveFigures(data) {
 									// Add title
 									if (!currentPubData.title) {
 										// Get title
-										currentPubData.title = html.window.document.querySelector(
+										let title = html.window.document.querySelector(
 											`.${domClasses.title}`,
 										)?.textContent;
+										// Clean up title so does not begin with \n or any other whitespace
+										title = title?.replace(/^\s+|\s+$/g, "");
+
+										if (title) {
+											currentPubData.title = title.trim();
+										}
+									}
+
+									// Add abstract
+									if (!currentPubData.abstract) {
+										// Abstract is the first <div> under <div class="tsec sec">
+										let abstract = html.window.document.getElementsByClassName(
+											domClasses.abstract,
+										)?.[0]?.textContent;
+
+										// Clean up abstract by removing the "Go to:Abstract" which it typically begins with
+										if (abstract) {
+											abstract = abstract.replace(/^Go to:Abstract/, "");
+											// Clean again to ensure it does not begin with just "Abstract"
+											if (abstract.startsWith("Abstract")) {
+												abstract = abstract.replace(/^Abstract/, "");
+											}
+
+											// Add abstract
+											currentPubData.abstract = abstract?.trim();
+										}
 									}
 
 									// Add figure data
@@ -185,24 +212,29 @@ export async function retrieveFigures(data) {
 									currentPubData.figures[imageName].src = imageSrc;
 
 									/** Figure fount is typically the last set of numbers following a letter or special character in image name */
-									let figureFound = imageName.match(/\d+/g)?.pop();
+									let figureFound = parseInt(imageName.match(/\d+/g)?.pop());
 
 									// console feedback
 									console.log(`Retrieving figure ${imageName} for ${pmc}...`);
 
-									/** Figure caption is contained in a DOM that has an ID format of `lgnd_f[figure number]` */
-									let figureCaption = html.window.document.getElementById(
-										`lgnd_f${figureFound}`,
+									// Find figure caption that begins with "lgnd_" and ends with the figure number found (figureFound)
+									/** Figure caption */
+									let figureCaption = html.window.document.querySelector(
+										`[id^="lgnd_"][id$="${figureFound}"]`,
 									)?.textContent;
-
-									// Add figure caption
+									// Clean up figure caption text to remove "Fig ${figureFound}", "Fig. ${figureFound}", "Fig${figureFound}" "Figure ${figureFound}" or "FIGURE ${figureFound}" from beginning of text
 									if (figureCaption) {
-										currentPubData.figures[imageName].caption = figureCaption;
-									}
+										figureCaption = figureCaption.replace(
+											/^Fig\s+|^Fig\.\s+|^Fig\d+\s+|^FIGURE\s+|^Figure\s+|^FIG\s+|^FIG\.\s+|^FIG\d+\s+/g,
+											"",
+										);
+										// Clean again to ensure it does not begin with just "Figure"
+										if (figureCaption.startsWith("Figure")) {
+											figureCaption = figureCaption.replace(/^Figure/, "");
+										}
 
-									// Download figure to species folder (data -> figures -> [species] -> [pmc] -> [image name])
-									if (!fs.existsSync(`${speciesFolder}/${pmc}`)) {
-										await fs.mkdirSync(`${speciesFolder}/${pmc}`);
+										// Add figure caption
+										currentPubData.figures[imageName].caption = figureCaption?.trim();
 									}
 
 									/** Download path */
@@ -210,10 +242,7 @@ export async function retrieveFigures(data) {
 									/** Image download link */
 									let imageLink = `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmc}/bin/${imageName}`;
 									if (!fs.existsSync(imagePath)) {
-										// console feedback
-										console.log(`Downloading figure ${imageName} for ${pmc}...`);
-
-										throttleImages(async () => {
+										await throttleImages(async () => {
 											await axios
 												.get(imageLink, {
 													responseType: "stream",
@@ -221,8 +250,18 @@ export async function retrieveFigures(data) {
 														"Content-Type": "image/jpeg",
 													},
 												})
-												.then((response) => {
-													response.data.pipe(fs.createWriteStream(imagePath));
+												.then(async (response) => {
+													// console feedback
+													console.log(
+														`Downloading figure ${imageName} for ${pmc} (${species})...`,
+													);
+
+													// Download figure to species folder (data -> figures -> [species] -> [pmc] -> [image name])
+													if (!fs.existsSync(`${speciesFolder}/${pmc}`)) {
+														await fs.mkdirSync(`${speciesFolder}/${pmc}`);
+													}
+
+													await response.data.pipe(fs.createWriteStream(imagePath));
 												});
 										});
 									}

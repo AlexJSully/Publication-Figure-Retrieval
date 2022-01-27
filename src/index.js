@@ -41,6 +41,7 @@ async function init(useOACommData = true) {
 	/** List of all species and their retrievable PMID lists */
 	let speciesPMIDList = {};
 
+	/** Total number of species that been called by ENTREZ API */
 	let speciesCount = 0;
 
 	// Go through each species and get the PMID list
@@ -67,6 +68,7 @@ async function init(useOACommData = true) {
 			// Add to speciesPMIDList
 			speciesPMIDList[species] = pmidList;
 
+			// Increment speciesCount
 			speciesCount++;
 
 			if (speciesCount === speciesList.length) {
