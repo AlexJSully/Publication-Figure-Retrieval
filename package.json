@@ -1,35 +1,41 @@
 {
-  "name": "publication-figure-web-scrapping",
-  "contributors": [
-    {
-      "name": "Alexander Sullivan",
-      "email": "alexander.j.sullivan@hotmail.com",
-      "url": "https://alexjsully.me/"
-    }
-  ],
-  "version": "1.0.1",
-  "private": true,
-  "description": "This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.",
-  "dependencies": {
-    "concurrently": "^6.4.0"
-  },
-  "main": "index.js",
-  "scripts": {
-    "start": "concurrently \"cd server && node private-server.js\" \"cd client && npm start\""
-  },
-  "bugs": {
-    "url": "https://github.com/ASully/Publication-Figures-Web-Scrapping/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ASully/Publication-Figures-Web-Scrapping.git"
-  },
-  "keywords": [
-    "science",
-    "bioinformatics",
-    "web-scraping",
-    "publication-data"
-  ],
-  "license": "ISC",
-  "homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme"
+	"name": "publication-figure-web-scrapping",
+	"contributors": [
+		{
+			"name": "Alexander Sullivan",
+			"email": "alexander.j.sullivan@hotmail.com",
+			"url": "https://alexjsully.me/"
+		}
+	],
+	"version": "2.0.0",
+	"private": true,
+	"description": "This tool provides a method for scraping through NCBI's PubMed publications and retrieving (downloading) the figures from open access and publicly available publications.",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"start": "node ./src/index.js",
+		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"axios": "^0.25.0",
+		"jsdom": "^19.0.0",
+		"lodash": "^4.17.21",
+		"throttled-queue": "^2.1.2"
+	},
+	"bugs": {
+		"url": "https://github.com/ASully/Publication-Figures-Web-Scrapping/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ASully/Publication-Figures-Web-Scrapping.git"
+	},
+	"keywords": [
+		"science",
+		"bioinformatics",
+		"web-scraping",
+		"publication-data"
+	],
+	"license": "GNU General Public License v2.0",
+	"homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme"
 }

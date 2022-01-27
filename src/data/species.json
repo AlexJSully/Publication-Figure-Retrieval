@@ -1,0 +1,99 @@
+{
+	"Actinidia_chinensis": {
+		"alias": ["Actinidia chinensis", "Golden kiwifruit", "Kiwi", "Kiwifruit"]
+	},
+	"Arabidopsis_thaliana": {
+		"alias": ["Arabidopsis thaliana", "Mouse-ear cress", "Thale cress"]
+	},
+	"Arachis_hypogaea": {
+		"alias": ["Arachis hypogaea", "Peanut"]
+	},
+	"Brachypodium_distachyon": {
+		"alias": ["Brachypodium distachyon", "Purple false brome", "Stiff brome", "Trachynia distachya"]
+	},
+	"Camelina_sativa": {
+		"alias": ["Camelina sativa", "False flax", "Myagrum sativum"]
+	},
+	"Cannabis_sativa": {
+		"alias": ["Cannabis sativa", "Hemp", "Marijuana", "Weed"]
+	},
+	"Eucalyptus_grandis": {
+		"alias": ["Eucalyptus grandis", "Flooded gum"]
+	},
+	"Eutrema_salsugineum": {
+		"alias": ["EutremaSal sugineum", "Saltwater cress", "Sisymbrium salsugineum"]
+	},
+	"Glycine_max": {
+		"alias": ["Glycine hispida", "Glycine max", "Soybeans"]
+	},
+	"Helianthus_annuus": {
+		"alias": ["Common sunflower", "Helianthus annuus", "Sunflower"]
+	},
+	"Hordeum_vulgare": {
+		"alias": ["Barley", "Hordeum vulgare"]
+	},
+	"Kalanchoe_fedtschenkoi": {
+		"alias": ["Kalanchoe fedtschenkoi", "South America air plant"]
+	},
+	"Medicago_truncatula": {
+		"alias": ["Barrel medic", "Medicago tribuloides", "Medicago truncatula"]
+	},
+	"Oryza_sativa": {
+		"alias": ["Oryza sativa ssp. japonica", "Oryza sativa", "Rice"]
+	},
+	"Physcomitrella_patens": {
+		"alias": ["Physcomitrella patens", "Physcomitrium patens", "Spreading earthmoss", "Spreading-leaved earth moss"]
+	},
+	"Picea sitchensis": {
+		"alias": ["Picea sitchensis", "Pinus sitchensis", "Sitka spruce"]
+	},
+	"Populus_trichocarpa": {
+		"alias": [
+			"Black cottonwood",
+			"Poplar",
+			"Populus balsamifera subsp. trichocarpa",
+			"Populus trichocarpa",
+			"Western balsam poplar"
+		]
+	},
+	"Saccharum_hybrid_cultivar": {
+		"alias": ["Saccharum R570", "Saccharum hybrid cultivar", "Sugarcane"]
+	},
+	"Salix_purpurea": {
+		"alias": ["Purple osier willow", "Salix purpurea", "Willow"]
+	},
+	"Selaginella_moellendorffii": {
+		"alias": ["Selaginella moellendorffii", "Spikemoss"]
+	},
+	"Solanum_lycopersicum": {
+		"alias": ["Lycopersicon esculentum", "Solanum lycopersicum", "Tomato"]
+	},
+	"Solanum_tuberosum": {
+		"alias": ["Potato", "Solanum tuberosum"]
+	},
+	"Theobroma_cacao": {
+		"alias": [
+			"Cacao tree",
+			"Cacao",
+			"Chocolate liquor",
+			"Chocolate",
+			"Cocoa beans",
+			"Cocoa butter",
+			"Cocoa solids",
+			"Cocoa",
+			"Theobroma cacao"
+		]
+	},
+	"Triticale": {
+		"alias": ["Triticale", "Triticosecale Wittmack", "Triticosecale", "Triticum-Secale hybrid", "Wheat-rye hybrid"]
+	},
+	"Triticum_aestivum": {
+		"alias": ["Triticum aestivum", "Wheat"]
+	},
+	"Vitis_vinifera": {
+		"alias": ["Grape", "Vitis vinifera"]
+	},
+	"Zea_mays": {
+		"alias": ["Corn", "Maize", "Zea mays"]
+	}
+}
