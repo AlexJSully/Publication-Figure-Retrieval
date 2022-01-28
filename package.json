@@ -1,5 +1,5 @@
 {
-	"name": "publication-figure-web-scrapping",
+	"name": "publication-figure-web-scraping",
 	"contributors": [
 		{
 			"name": "Alexander Sullivan",
@@ -23,11 +23,11 @@
 		"throttled-queue": "^2.1.2"
 	},
 	"bugs": {
-		"url": "https://github.com/ASully/Publication-Figures-Web-Scrapping/issues"
+		"url": "https://github.com/ASully/Publication-Figures-Web-Scraping/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/ASully/Publication-Figures-Web-Scrapping.git"
+		"url": "git+https://github.com/ASully/Publication-Figures-Web-Scraping.git"
 	},
 	"keywords": [
 		"science",
@@ -36,5 +36,5 @@
 		"publication-data"
 	],
 	"license": "GNU General Public License v2.0",
-	"homepage": "https://github.com/ASully/Publication-Figures-Web-Scrapping#readme"
+	"homepage": "https://github.com/ASully/Publication-Figures-Web-Scraping#readme"
 }

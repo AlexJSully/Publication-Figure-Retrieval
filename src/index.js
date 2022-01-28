@@ -8,6 +8,10 @@ import {getPMCList, retrieveFigures} from "./scripts/data-retrieval.js";
 /** Throttled queue for ENTREZ API requests (1 per second) */
 const throttle = throttledQueue(1, 1000);
 
+/**
+ * Initializes the publication scraper
+ * @param {Boolean} useOACommData Whether to use the OAComm data [true, default] or all data [false]
+ */
 async function init(useOACommData = true) {
 	// console feedback
 	console.log(`Initializing publication figure retrieval...`);
@@ -39,7 +43,7 @@ async function init(useOACommData = true) {
 	}
 
 	/** List of all species and their retrievable PMID lists */
-	let speciesPMIDList = {};
+	let speciesPMIDList = await JSON.parse(fs.readFileSync("./src/data/species-pmid-list.json"));
 
 	/** Total number of species that been called by ENTREZ API */
 	let speciesCount = 0;
@@ -48,25 +52,44 @@ async function init(useOACommData = true) {
 	for (let i = 0; i < speciesList.length; i++) {
 		let species = speciesList[i];
 
-		throttle(async () => {
-			/** PMID list for species */
-			let pmidList = await getPMCList(species);
+		if (!speciesPMIDList[species]) {
+			throttle(async () => {
+				/** PMID list for species */
+				let pmidList = await getPMCList(species);
 
-			// If using OA commercial data, only keep PMIDs that are in the commercial use list
-			if (useOACommData) {
-				pmidList = lodash.intersection(pmidList, oaCommUseList);
+				// If using OA commercial data, only keep PMIDs that are in the commercial use list
+				if (useOACommData) {
+					pmidList = lodash.intersection(pmidList, oaCommUseList);
 
-				// console feedback
-				console.log(
-					`Found ${pmidList.length} commercial use publications for ${species.split("_").join(" ")}...`,
-				);
-			} else {
-				// console feedback
-				console.log(`Found ${pmidList.length} publications for ${species.split("_").join(" ")}...`);
-			}
+					// console feedback
+					console.log(
+						`Found ${pmidList.length} commercial use publications for ${species.split("_").join(" ")}...`,
+					);
+				} else {
+					// console feedback
+					console.log(`Found ${pmidList.length} publications for ${species.split("_").join(" ")}...`);
+				}
 
-			// Add to speciesPMIDList
-			speciesPMIDList[species] = pmidList;
+				// Add to speciesPMIDList
+				speciesPMIDList[species] = pmidList;
+
+				// Increment speciesCount
+				speciesCount++;
+
+				// Write speciesPMIDList to file
+				await fs.writeFileSync("./src/data/species-pmid-list.json", JSON.stringify(speciesPMIDList, null, 2));
+
+				if (speciesCount === speciesList.length) {
+					// console feedback
+					console.log(`Finished retrieving data for ${speciesList.length} species...`);
+
+					// Start downloading figures based on retrieved data
+					await retrieveFigures(speciesPMIDList);
+				}
+			});
+		} else {
+			// console feedback
+			console.log(`${species.split("_").join(" ")} already has a PMID list, skipping...`);
 
 			// Increment speciesCount
 			speciesCount++;
@@ -81,7 +104,7 @@ async function init(useOACommData = true) {
 				// Start downloading figures based on retrieved data
 				await retrieveFigures(speciesPMIDList);
 			}
-		});
+		}
 	}
 }
 
