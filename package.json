@@ -13,7 +13,8 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"start": "node ./src/index.js",
+		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js",
+		"poststart": "npm start",
 		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js"
 	},
 	"dependencies": {

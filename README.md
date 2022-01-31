@@ -1,10 +1,12 @@
 # Publication figure web scraping
 
-This tool provides a method for scraping through NCBI's [PubMed](https://www.ncbi.nlm.nih.gov/pubmed) publications and retrieving (downloading) the figures from open access and publicly available publications.
+This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.nlm.nih.gov/labs/pmc/) publications and retrieving (downloading) the figures from open access and publicly available publications.
 
 ## Requirements
 
 -   Node.js >= 16.13.1
+-   RAM >= 4GB
+-   Internet connection with greater than 7mb/s download speed
 
 ## Installation & Setup
 
@@ -14,15 +16,17 @@ If you would like to run or modify the publication figure web scraping tool loca
 git clone https://github.com/ASully/Publication-Figures-Web-Scraping.git
 ```
 
-Then run `npm install` within the host, client and server directories, then change to appropriate directory and then `npm start`. This tool runs within your node environment.
+Then run `npm install` then `npm start`. This tool runs within your node environment. On Windows, this script needs to run in an administrator mode.
 
-The images are downloaded then downloaded locally within this containing directory under [src/data/figures](./src/data/figures).
+The images are downloaded then downloaded locally within this containing directory under [src/data/figures/{species}/{PMC ID}](./src/data/figures).
 
 If you would like to run against commercial use publications, you will need to download [`oa_comm_use_file.list.txt`](https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_comm_use_file.list.txt) from [ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/](https://ftp.ncbi.nlm.nih.gov/pub/pmc/) then run `npm run process`. Once that is done, set [index.js](./src/index.js) init function to true (`await init(true);`)
 
-The publication figure scraper will resume where you last left off. If you would like to reset the scraper, empty [species-pmid-list.json](./src/data/species-pmid-list.json) and [data-retrieved.json](./src/data/data-retrieved.json) to contain only just an empty JSON object (`{}`).
+The publication figure scraper will resume where you last left off. If you would like to reset the scraper, empty [species-pmid-list.json](./src/data/species-pmid-list.json), [data-retrieved.json](./src/data/data-retrieved.json) and [data-empty-pubs.json](./src/data/data-empty-pubs.json) to contain only just an empty JSON object (`{}`).
 
 If you would like to add more species support for publications to be scraped, add the species to [species.json](./src/data/species.json) and then run `npm start`. Currently, this JSON includes species' common aliases which are not currently being used but may be useful in the future. If you would like to scrape a single species, then change `speciesList` in [index.js](./src/index.js) to an array of species scientific name(s) to scrape. For example: `speciesList = ['Arabidopsis thaliana']; // Or whatever species name(s) you would like to scrape`. Currently, it is set to scrape all species within the [species.json](./src/data/species.json) file.
+
+If in the instance that you do not have an internet connection/speed greater than 7mb/s, you will need to change all the Axios request timeouts in [data-retrieval.js](./src/scripts/data-retrieval.js) to a value of at least half of your speed (e.g. down speed of 10mb/s, set timeout to 5s).
 
 ## Known issues
 
