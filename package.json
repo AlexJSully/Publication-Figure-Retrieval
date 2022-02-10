@@ -7,7 +7,7 @@
 			"url": "https://alexjsully.me/"
 		}
 	],
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"private": true,
 	"description": "This tool provides a method for scraping through NCBI's PubMed publications and retrieving (downloading) the figures from open access and publicly available publications.",
 	"main": "index.js",
@@ -15,7 +15,8 @@
 	"scripts": {
 		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js",
 		"poststart": "npm start",
-		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js"
+		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js",
+		"prettier": "prettier --write --end-of-line auto ./"
 	},
 	"dependencies": {
 		"axios": "^0.25.0",
