@@ -2,6 +2,11 @@
 
 This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.nlm.nih.gov/labs/pmc/) publications and retrieving (downloading) the figures from open access and publicly available publications.
 
+[![Codiga Code Quality Score](https://api.codiga.io/project/32059/score/svg)](https://api.codiga.io/project/32059/score/svg)
+[![Codiga Code Grade](https://api.codiga.io/project/32059/status/svg)](https://api.codiga.io/project/32059/status/svg)
+[![CodeFactor](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping/badge)](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping)
+[![DeepSource](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping.svg/?label=active+issues&show_trend=true&token=yv5DqqM-Is2y8RASoXbYwX1k)](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping/?ref=repository-badge)
+
 ## Requirements
 
 -   Node.js >= 16.13.1
