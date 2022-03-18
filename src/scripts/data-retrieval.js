@@ -22,23 +22,23 @@ export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 1000
 
 	// Build API URL
 	/** ENTREZ's esearch */
-	let base = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?`;
+	const base = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?";
 	/** Database */
-	let db = `db=pmc&`;
+	const db = "db=pmc&";
 	/** What is being searched for */
-	let term = `term=${species}[Organism]&`;
+	const term = `term=${species}[Organism]&`;
 	/** Maximum number of publications */
-	let retmax = `retmax=${maxIDs}&`;
+	const retmax = `retmax=${maxIDs}&`;
 
 	/** API's URL */
-	let url = base + db + term + retmax;
+	const url = base + db + term + retmax;
 
 	// console feedback
 	console.log(`Retrieving ${species.split("_").join(" ")} PMCs...`);
 
 	// Get and return XML document/data
 	/** API's response */
-	let response = await axios.get(url, {
+	const response = await axios.get(url, {
 		responseType: "document",
 		headers: {
 			"Content-Type": "text/xml",
@@ -48,7 +48,7 @@ export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 1000
 		},
 	});
 	/** API's data */
-	let data = response?.data;
+	const data = response?.data;
 
 	// Go through XML and extract PMCs under eSEarchResult -> IdList -> Id
 	/** PMC list */
@@ -58,7 +58,7 @@ export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 1000
 		if (typeof data === "string") {
 			// Use JSDOM to parse XML and get all PMCs
 			/** JSDOM document */
-			let dom = new JSDOM(data);
+			const dom = new JSDOM(data);
 
 			pmcList = Array.from(dom.window.document.querySelectorAll("Id")).map((id) => {
 				return id.textContent;
@@ -86,12 +86,12 @@ let dataRetrieved;
 let emptyPubData;
 
 /** How many publications will be scraped before memory reset */
-let resetRange = 50;
+const resetRange = 50;
 /** Current position of how many publications have been scraped */
 let resetIndex = 0;
 
 /** Total number of species available to scrape */
-let speciesRange = undefined;
+let speciesRange;
 /** Current position of species that have been scraped */
 let speciesIndex = 0;
 
@@ -102,7 +102,7 @@ let speciesIndex = 0;
  */
 export async function retrieveFigures(data) {
 	// console feedback
-	console.log(`Retrieving figures...`);
+	console.log("Retrieving figures...");
 
 	if (!dataRetrieved) {
 		dataRetrieved = JSON.parse(fs.readFileSync("./src/data/data-retrieved.json"));
@@ -119,7 +119,7 @@ export async function retrieveFigures(data) {
 	// Go through each species to retrieve PMC ID's publications
 	for (const [species, pmcList] of Object.entries(data)) {
 		// Go through each PMC ID for its respective publication
-		for (let pmc of pmcList) {
+		for (const pmc of pmcList) {
 			// Check if PMC ID has already been retrieved
 			if (!dataRetrieved?.[pmc] && !emptyPubData?.[pmc] && resetIndex <= resetRange) {
 				resetIndex++;
@@ -130,13 +130,13 @@ export async function retrieveFigures(data) {
 						console.log(`Retrieving figures for ${species}'s PMC${pmc}...`);
 
 						// If there is no figures directory under data, create one
-						if (!fs.existsSync(`./src/data/figures`)) {
-							await fs.mkdirSync(`./src/data/figures`);
+						if (!fs.existsSync("./src/data/figures")) {
+							await fs.mkdirSync("./src/data/figures");
 						}
 
 						// If folder does not exist for species, create folder (data -> figures -> [species])
 						/** Path for the given species */
-						let speciesFolder = `./src/data/figures/${species}`;
+						const speciesFolder = `./src/data/figures/${species}`;
 						// If path does not exist, create it
 						if (!fs.existsSync(speciesFolder)) {
 							await fs.mkdirSync(speciesFolder);
@@ -144,7 +144,7 @@ export async function retrieveFigures(data) {
 
 						// Create URL to web scrap
 						/** PMC URL */
-						let url = `https://www.ncbi.nlm.nih.gov/labs/pmc/articles/${pmc}/`;
+						const url = `https://www.ncbi.nlm.nih.gov/labs/pmc/articles/${pmc}/`;
 
 						// console feedback
 						console.log(`Retrieving publication HTML for ${pmc}...`);
@@ -152,7 +152,7 @@ export async function retrieveFigures(data) {
 						// Get HTML from URL
 						/** Publication's web page from Axios web scraping */
 						try {
-							let response = await axios.get(url, {
+							const response = await axios.get(url, {
 								responseType: "document",
 								headers: {
 									"Content-Type": "text/html",
@@ -166,13 +166,13 @@ export async function retrieveFigures(data) {
 								console.log(`Got publication HTML for ${pmc}...`);
 
 								/** Convert web scraping response into an HTML document */
-								let html = new JSDOM(response.data);
+								const html = new JSDOM(response.data);
 
 								/** Current publication data */
-								let currentPubData = {};
+								const currentPubData = {};
 
 								/** Publication class names */
-								let domClasses = {
+								const domClasses = {
 									title: "content-title",
 									abstract: "tsec sec",
 									figures: ["tileshop", "fig-image", "titleshop"],
@@ -181,7 +181,7 @@ export async function retrieveFigures(data) {
 								// Get figures
 								await domClasses.figures.forEach(async (className) => {
 									/** Publication's figures */
-									let figure = html.window.document.querySelectorAll(`.${className}`);
+									const figure = html.window.document.querySelectorAll(`.${className}`);
 
 									if (figure) {
 										// console feedback
@@ -189,10 +189,10 @@ export async function retrieveFigures(data) {
 
 										await figure.forEach(async (fig) => {
 											/** Name of the figure */
-											let imageName = fig.src?.split("/").pop();
+											const imageName = fig.src?.split("/").pop();
 
 											/** Figure's link (just used for verification not downloading) */
-											let imageSrc = fig?.src;
+											const imageSrc = fig?.src;
 
 											// If figure link exists
 											if (imageSrc) {
@@ -239,7 +239,7 @@ export async function retrieveFigures(data) {
 												currentPubData.figures[imageName] = {};
 
 												/** Figure fount is typically the last set of numbers following a letter or special character in image name */
-												let figureFound = parseInt(imageName.match(/\d+/g)?.pop());
+												const figureFound = parseInt(imageName.match(/\d+/g)?.pop());
 
 												// console feedback
 												console.log(`Retrieving figure ${imageName} for ${pmc}...`);
@@ -265,13 +265,13 @@ export async function retrieveFigures(data) {
 												}
 
 												/** Download path */
-												let imagePath = `${speciesFolder}/${pmc}/${imageName}`;
+												const imagePath = `${speciesFolder}/${pmc}/${imageName}`;
 												/** Image download link */
-												let imageLink = `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmc}/bin/${imageName}`;
+												const imageLink = `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmc}/bin/${imageName}`;
 												if (!fs.existsSync(imagePath)) {
 													await throttleImages(async () => {
 														try {
-															let imageItself = await axios.get(imageLink, {
+															const imageItself = await axios.get(imageLink, {
 																responseType: "stream",
 																headers: {
 																	"Content-Type": "image/jpeg",
@@ -320,7 +320,7 @@ export async function retrieveFigures(data) {
 									);
 								} else {
 									emptyPubData[pmc] = {
-										cause: `No publication title or figures`,
+										cause: "No publication title or figures",
 									};
 
 									await fs.writeFileSync(
@@ -333,7 +333,7 @@ export async function retrieveFigures(data) {
 								}
 							} else {
 								emptyPubData[pmc] = {
-									cause: `Unable to webscrape`,
+									cause: "Unable to webscrape",
 								};
 
 								await fs.writeFileSync(
@@ -346,7 +346,7 @@ export async function retrieveFigures(data) {
 							}
 						} catch (e) {
 							emptyPubData[pmc] = {
-								cause: `Error retrieving`,
+								cause: "Error retrieving",
 							};
 
 							await fs.writeFileSync(
@@ -368,7 +368,7 @@ export async function retrieveFigures(data) {
 
 		if ((!speciesRange || speciesIndex >= speciesRange) && resetIndex < resetRange) {
 			// console feedback
-			throw new Error(`No more available figures to download`);
+			throw new Error("No more available figures to download");
 		}
 	}
 }
