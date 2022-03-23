@@ -4,6 +4,7 @@ This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.n
 
 [![Codiga Code Quality Score](https://api.codiga.io/project/32059/score/svg)](https://api.codiga.io/project/32059/score/svg)
 [![Codiga Code Grade](https://api.codiga.io/project/32059/status/svg)](https://api.codiga.io/project/32059/status/svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/4d9e6be4edc0d12ab48a/maintainability)](https://codeclimate.com/github/ASully/Publication-Figures-Web-Scraping/maintainability)
 [![CodeFactor](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping/badge)](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping)
 [![DeepSource](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping.svg/?label=active+issues&show_trend=true&token=yv5DqqM-Is2y8RASoXbYwX1k)](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping/?ref=repository-badge)
 
@@ -38,6 +39,14 @@ If in the instance that you do not have an internet connection/speed greater tha
 We aim to make this tool as perfect as possible but unfortunately, there may be some unforeseen bugs. If you manage to find one that is not here, feel free to create a bug report so we can fix it.
 
 -   None at the moment... Help us find some!
+
+## Sponsorship
+
+If you want to support my work, you can through the following methods:
+
+-   [BTC](3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog) - 3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog
+-   [ETH](0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2) - 0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2
+-   [PayPal](https://paypal.me/alexjsully) - paypal.me/alexjsully
 
 ## Contributing
 
