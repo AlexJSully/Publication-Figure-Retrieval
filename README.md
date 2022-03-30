@@ -7,6 +7,9 @@ This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.n
 [![Maintainability](https://api.codeclimate.com/v1/badges/4d9e6be4edc0d12ab48a/maintainability)](https://codeclimate.com/github/ASully/Publication-Figures-Web-Scraping/maintainability)
 [![CodeFactor](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping/badge)](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping)
 [![DeepSource](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping.svg/?label=active+issues&show_trend=true&token=yv5DqqM-Is2y8RASoXbYwX1k)](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping/?ref=repository-badge)
+[![Follow on Twitter](https://img.shields.io/twitter/follow/alexjsully?style=social)](https://twitter.com/alexjsully)
+[![GitHub repo size](https://img.shields.io/github/repo-size/ASully/Publication-Figures-Web-Scraping)](https://github.com/ASully/Publication-Figures-Web-Scraping)
+[![GitHub](https://img.shields.io/github/license/ASully/Publication-Figures-Web-Scraping)](https://github.com/ASully/Publication-Figures-Web-Scraping)
 
 ## Requirements
 
