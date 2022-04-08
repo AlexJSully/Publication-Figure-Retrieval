@@ -8,7 +8,7 @@ console.log(`Initializing processing of OA commercial use list...`);
 
 // Get raw commercial use list
 /** @type {String} All commercial use publications */
-let rawCommUseList = await fs.readFileSync("./src/data/raw/oa_comm_use_file_list.txt", "utf8");
+const rawCommUseList = await fs.readFileSync("./src/data/raw/oa_comm_use_file_list.txt", "utf8");
 
 // Split raw file by new line then by tab indentation into following object:
 // {
@@ -19,7 +19,7 @@ let rawCommUseList = await fs.readFileSync("./src/data/raw/oa_comm_use_file_list
 // 	"license": [4],
 // }
 /** @type {Object} Raw data as an object instead of raw text data */
-let rawData = rawCommUseList.split("\n").map((data) => {
+const rawData = rawCommUseList.split("\n").map((data) => {
 	return {
 		pmc: data.split("\t")[2],
 		pmid: data.split("\t")[3],
@@ -31,7 +31,7 @@ let rawData = rawCommUseList.split("\n").map((data) => {
 console.log(`Found ${rawData.length} files in raw commercial use list...`);
 
 /** @type {Object} Useable publications where key is the PMID */
-let useableData = {};
+const useableData = {};
 // Go through each data point and determine which entries are usable
 rawData.forEach((data) => {
 	// If has PMC, PMID and a CC BY license, that is useable data

@@ -43,15 +43,13 @@ async function init(useOACommData = true) {
 	}
 
 	/** List of all species and their retrievable PMID lists */
-	let speciesPMIDList = await JSON.parse(fs.readFileSync("./src/data/species-pmid-list.json"));
+	const speciesPMIDList = await JSON.parse(fs.readFileSync("./src/data/species-pmid-list.json"));
 
 	/** Total number of species that been called by ENTREZ API */
 	let speciesCount = 0;
 
 	// Go through each species and get the PMID list
-	for (let i = 0; i < speciesList.length; i++) {
-		let species = speciesList[i];
-
+	for (const species of speciesList) {
 		if (!speciesPMIDList[species]) {
 			throttle(async () => {
 				/** PMID list for species */
