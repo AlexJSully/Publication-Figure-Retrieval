@@ -19,10 +19,10 @@
 		"prettier": "prettier --write --end-of-line auto ./"
 	},
 	"dependencies": {
-		"axios": "^0.26.1",
+		"axios": "^0.27.2",
 		"jsdom": "^19.0.0",
 		"lodash": "^4.17.21",
-		"throttled-queue": "^2.1.2"
+		"throttled-queue": "^2.1.4"
 	},
 	"bugs": {
 		"url": "https://github.com/ASully/Publication-Figures-Web-Scraping/issues"
