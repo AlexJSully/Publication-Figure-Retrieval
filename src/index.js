@@ -106,4 +106,4 @@ async function init(useOACommData = true) {
 	}
 }
 
-await init(false);
+init(false);

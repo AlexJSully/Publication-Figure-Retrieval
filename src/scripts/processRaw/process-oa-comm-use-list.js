@@ -8,7 +8,7 @@ console.log(`Initializing processing of OA commercial use list...`);
 
 // Get raw commercial use list
 /** @type {String} All commercial use publications */
-const rawCommUseList = await fs.readFileSync("./src/data/raw/oa_comm_use_file_list.txt", "utf8");
+const rawCommUseList = fs.readFileSync("./src/data/raw/oa_comm_use_file_list.txt", "utf8");
 
 // Split raw file by new line then by tab indentation into following object:
 // {
