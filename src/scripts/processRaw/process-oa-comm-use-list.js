@@ -4,7 +4,7 @@
 import * as fs from "fs";
 
 // console feedback
-console.log(`Initializing processing of OA commercial use list...`);
+console.log("Initializing processing of OA commercial use list...");
 
 // Get raw commercial use list
 /** @type {String} All commercial use publications */
@@ -36,7 +36,7 @@ const useableData = {};
 rawData.forEach((data) => {
 	// If has PMC, PMID and a CC BY license, that is useable data
 	if (data?.pmc !== "" && data?.license === "CC BY" && data?.pmc?.split("PMC")?.[1]) {
-		let pmc = data.pmc.split("PMC")[1];
+		const pmc = data.pmc.split("PMC")[1];
 		useableData[pmc] = data;
 	}
 });
@@ -51,6 +51,6 @@ console.log(
 fs.writeFileSync("./src/data/oa-comm-use-list.json", JSON.stringify(useableData, null, 2));
 
 // console feedback
-console.log(`Finished processing of OA commercial use list.`);
+console.log("Finished processing of OA commercial use list.");
 
 // END
