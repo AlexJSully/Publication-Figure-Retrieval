@@ -35,3 +35,7 @@ engines:
                 enabled: false
             MD030:
                 enabled: false
+exclude_patterns:
+    - "**/node_modules/"
+    - "**/.vscode/"
+    - "src/data/raw/oa_comm_use_file_list.txt"
