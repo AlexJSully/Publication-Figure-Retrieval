@@ -6,6 +6,9 @@ engines:
                 enabled: false
     fixme:
         enabled: true
+        checks:
+            TODO:
+                enabled: false
     csslint:
         enabled: true
         checks:
