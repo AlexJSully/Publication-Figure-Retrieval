@@ -33,6 +33,7 @@ async function init(useOACommData = true) {
 	let oaCommUse;
 	/** List of the PMIDs for commercial use publications */
 	let oaCommUseList;
+
 	if (useOACommData) {
 		// Get PMIDs for commercial use publications
 		oaCommUse = await JSON.parse(fs.readFileSync("./src/data/oa-comm-use-list.json"));

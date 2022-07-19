@@ -36,7 +36,7 @@ const useableData = {};
 rawData.forEach((data) => {
 	// If has PMC, PMID and a CC BY license, that is useable data
 	if (data?.pmc !== "" && data?.license === "CC BY" && data?.pmc?.split("PMC")?.[1]) {
-		let pmc = data.pmc.split("PMC")[1];
+		const pmc = data.pmc.split("PMC")[1];
 		useableData[pmc] = data;
 	}
 });
