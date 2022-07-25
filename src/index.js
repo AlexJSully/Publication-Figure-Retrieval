@@ -4,6 +4,10 @@ import lodash from "lodash";
 import throttledQueue from "throttled-queue";
 // Custom imports
 import {getPMCList, retrieveFigures} from "./scripts/data-retrieval.js";
+// Sentry
+import "dotenv/config";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 
 /** Throttled queue for ENTREZ API requests (1 per second) */
 const throttle = throttledQueue(1, 1000);
@@ -106,5 +110,21 @@ async function init(useOACommData = true) {
 		}
 	}
 }
+
+// Sentry scripts
+// !! @AlexJSully: If you do not have access to the Sentry API key,
+// !! you can comment out the following lines or reach out to me on
+// !! either the GitHub discussions, or on Twitter (@AlexJSully)
+Sentry.init({
+	dsn: process.env.SENTRY_DNS,
+	// Set tracesSampleRate to 1.0 to capture 100%
+	// of transactions for performance monitoring.
+	// We recommend adjusting this value in production
+	tracesSampleRate: 1.0,
+});
+
+Sentry.configureScope((scope) => {
+	scope.setTag("app-version", process.env.APP_VERSION);
+});
 
 init(false);
