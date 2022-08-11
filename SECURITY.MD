@@ -6,4 +6,4 @@ We are actively maintaining and developing on the latest build on the master bra
 
 ## Reporting a Vulnerability
 
-If you want to report a security vulnerability, you can do so [on the GitHub issues page](https://github.com/ASully/Publication-Figures-Web-Scraping/issues/new/choose).
+If you want to report a security vulnerability, you can do so [on the GitHub issues page](https://github.com/AlexJSully/Publication-Figures-Web-Scraping/issues/new/choose).

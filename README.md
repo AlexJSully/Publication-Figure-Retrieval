@@ -4,12 +4,12 @@ This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.n
 
 [![Codiga Code Quality Score](https://api.codiga.io/project/32059/score/svg)](https://api.codiga.io/project/32059/score/svg)
 [![Codiga Code Grade](https://api.codiga.io/project/32059/status/svg)](https://api.codiga.io/project/32059/status/svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/4d9e6be4edc0d12ab48a/maintainability)](https://codeclimate.com/github/ASully/Publication-Figures-Web-Scraping/maintainability)
-[![CodeFactor](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping/badge)](https://www.codefactor.io/repository/github/asully/publication-figures-web-scraping)
-[![DeepSource](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping.svg/?label=active+issues&show_trend=true&token=yv5DqqM-Is2y8RASoXbYwX1k)](https://deepsource.io/gh/ASully/Publication-Figures-Web-Scraping/?ref=repository-badge)
+[![Maintainability](https://api.codeclimate.com/v1/badges/4d9e6be4edc0d12ab48a/maintainability)](https://codeclimate.com/github/AlexJSully/Publication-Figures-Web-Scraping/maintainability)
+[![CodeFactor](https://www.codefactor.io/repository/github/AlexJSully/publication-figures-web-scraping/badge)](https://www.codefactor.io/repository/github/AlexJSully/publication-figures-web-scraping)
+[![DeepSource](https://deepsource.io/gh/AlexJSully/Publication-Figures-Web-Scraping.svg/?label=active+issues&show_trend=true&token=yv5DqqM-Is2y8RASoXbYwX1k)](https://deepsource.io/gh/AlexJSully/Publication-Figures-Web-Scraping/?ref=repository-badge)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/alexjsully?style=social)](https://twitter.com/alexjsully)
-[![GitHub repo size](https://img.shields.io/github/repo-size/ASully/Publication-Figures-Web-Scraping)](https://github.com/ASully/Publication-Figures-Web-Scraping)
-[![GitHub](https://img.shields.io/github/license/ASully/Publication-Figures-Web-Scraping)](https://github.com/ASully/Publication-Figures-Web-Scraping)
+[![GitHub repo size](https://img.shields.io/github/repo-size/AlexJSully/Publication-Figures-Web-Scraping)](https://github.com/AlexJSully/Publication-Figures-Web-Scraping)
+[![GitHub](https://img.shields.io/github/license/AlexJSully/Publication-Figures-Web-Scraping)](https://github.com/AlexJSully/Publication-Figures-Web-Scraping)
 
 ## Requirements
 
@@ -22,7 +22,7 @@ This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.n
 If you would like to run or modify the publication figure web scraping tool locally, clone the repository with git by running the following command:
 
 ```git
-git clone https://github.com/ASully/Publication-Figures-Web-Scraping.git
+git clone https://github.com/AlexJSully/Publication-Figures-Web-Scraping.git
 ```
 
 Then run `npm install` then `npm start`. This tool runs within your node environment. On Windows, this script needs to run in an administrator mode.
@@ -61,4 +61,4 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## Authors
 
--   Alexander Sullivan - [GitHub](https://github.com/ASully), [Twitter](https://twitter.com/alexjsully), [ORCiD](https://orcid.org/0000-0002-4463-4473), [LinkedIn](https://www.linkedin.com/in/alexanderjsullivan/), [Website](https://alexjsully.me/)
+-   Alexander Sullivan - [GitHub](https://github.com/AlexJSully), [Twitter](https://twitter.com/alexjsully), [ORCiD](https://orcid.org/0000-0002-4463-4473), [LinkedIn](https://www.linkedin.com/in/alexanderjsullivan/), [Website](https://alexjsully.me/)
