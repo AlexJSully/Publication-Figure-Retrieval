@@ -22,7 +22,7 @@
 		"@sentry/node": "^7.11.1",
 		"@sentry/tracing": "^7.11.1",
 		"axios": "^0.27.2",
-		"dotenv": "^16.0.1",
+		"dotenv": "^16.0.2",
 		"jsdom": "^20.0.0",
 		"lodash": "^4.17.21",
 		"throttled-queue": "^2.1.4"
