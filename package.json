@@ -19,11 +19,11 @@
 		"prettier": "prettier --write --end-of-line auto ./"
 	},
 	"dependencies": {
-		"@sentry/node": "^7.13.0",
-		"@sentry/tracing": "^7.13.0",
-		"axios": "^0.27.2",
-		"dotenv": "^16.0.2",
-		"jsdom": "^20.0.0",
+		"@sentry/node": "^7.15.0",
+		"@sentry/tracing": "^7.15.0",
+		"axios": "^1.1.2",
+		"dotenv": "^16.0.3",
+		"jsdom": "^20.0.1",
 		"lodash": "^4.17.21",
 		"throttled-queue": "^2.1.4"
 	},
