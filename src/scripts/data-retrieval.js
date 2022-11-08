@@ -1,7 +1,7 @@
 // Axios needed for data retrieval
 import * as fs from "fs";
 import axios from "axios";
-import {JSDOM} from "jsdom";
+import { JSDOM } from "jsdom";
 import throttledQueue from "throttled-queue";
 
 /** Throttled queue for web scraping (1 per second) */

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import lodash from "lodash";
 import throttledQueue from "throttled-queue";
 // Custom imports
-import {getPMCList, retrieveFigures} from "./scripts/data-retrieval.js";
+import { getPMCList, retrieveFigures } from "./scripts/data-retrieval.js";
 // Sentry
 import "dotenv/config";
 import * as Sentry from "@sentry/node";
