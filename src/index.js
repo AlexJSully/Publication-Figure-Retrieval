@@ -18,7 +18,7 @@ const throttle = throttledQueue(1, 1000);
  */
 async function init(useOACommData = true) {
 	// console feedback
-	console.log(`Initializing publication figure retrieval...`);
+	console.log("Initializing publication figure retrieval...");
 
 	// Variables to determine what will be downloaded
 
