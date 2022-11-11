@@ -19,7 +19,7 @@
 		"prettier": "prettier --write --end-of-line auto ./"
 	},
 	"dependencies": {
-		"@sentry/node": "^7.17.3",
+		"@sentry/node": "^7.19.0",
 		"@sentry/tracing": "^7.17.3",
 		"axios": "^1.1.3",
 		"dotenv": "^16.0.3",
