@@ -28,7 +28,7 @@
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
-		"prettier": "^2.7.1"
+		"prettier": "^2.8.0"
 	},
 	"bugs": {
 		"url": "https://github.com/AlexJSully/Publication-Figures-Web-Scraping/issues"
