@@ -7,7 +7,8 @@ import { getPMCList, retrieveFigures } from "./scripts/data-retrieval.js";
 // Sentry
 import "dotenv/config";
 import * as Sentry from "@sentry/node";
-import * as Tracing from "@sentry/tracing";
+import "@sentry/tracing";
+import { CaptureConsole, Offline } from "@sentry/integrations";
 
 /** Throttled queue for ENTREZ API requests (1 per second) */
 const throttle = throttledQueue(1, 1000);
@@ -117,6 +118,12 @@ async function init(useOACommData = true) {
 // !! either the GitHub discussions, or on Twitter (@AlexJSully)
 Sentry.init({
 	dsn: process.env.SENTRY_DNS,
+	integrations: [
+		new CaptureConsole({
+			levels: ["error"],
+		}),
+		new Offline(),
+	],
 	// Set tracesSampleRate to 1.0 to capture 100%
 	// of transactions for performance monitoring.
 	// We recommend adjusting this value in production
