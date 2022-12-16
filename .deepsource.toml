@@ -37,7 +37,3 @@ exclude_patterns = [
 [[analyzers]]
 name = "javascript"
 enabled = true
-
-[[transformers]]
-name = "standardjs"
-enabled = true
