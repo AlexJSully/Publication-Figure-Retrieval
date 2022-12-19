@@ -19,7 +19,7 @@
 		"prettier": "prettier --write ./"
 	},
 	"dependencies": {
-		"@sentry/integrations": "^7.26.0",
+		"@sentry/integrations": "^7.27.0",
 		"@sentry/node": "^7.26.0",
 		"@sentry/tracing": "^7.26.0",
 		"axios": "^1.2.1",
