@@ -1,6 +1,5 @@
 // Intent of this code is meant to process the list of publications that are allowed to be used for commercial use
 // To run this script, use ```npm run process```
-// fs need for file writing and reading
 import * as fs from "fs";
 
 // console feedback
@@ -19,13 +18,11 @@ const rawCommUseList = fs.readFileSync("./src/data/raw/oa_comm_use_file_list.txt
 // 	"license": [4],
 // }
 /** @type {Object} Raw data as an object instead of raw text data */
-const rawData = rawCommUseList.split("\n").map((data) => {
-	return {
-		pmc: data.split("\t")[2],
-		pmid: data.split("\t")[3],
-		license: data.split("\t")[4],
-	};
-});
+const rawData = rawCommUseList.split("\n").map((data) => ({
+	pmc: data.split("\t")[2],
+	pmid: data.split("\t")[3],
+	license: data.split("\t")[4],
+}));
 
 // console feedback
 console.log(`Found ${rawData.length} files in raw commercial use list...`);

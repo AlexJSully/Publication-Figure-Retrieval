@@ -1,8 +1,8 @@
-// Axios needed for data retrieval
+/* eslint-disable no-param-reassign */
 import * as fs from "fs";
 import axios from "axios";
-import { JSDOM } from "jsdom";
 import throttledQueue from "throttled-queue";
+import { JSDOM } from "jsdom";
 
 /** Throttled queue for web scraping (1 per second) */
 const throttle = throttledQueue(1, 1000);
@@ -18,7 +18,7 @@ const throttleImages = throttledQueue(2, 1000);
 export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 10000000) {
 	// Clean arguments
 	species = species.trim().split(" ").join("_");
-	maxIDs = isNaN(maxIDs) ? 10000000 : maxIDs;
+	maxIDs = Number.isNaN(maxIDs) ? 10000000 : maxIDs;
 
 	// Build API URL
 	/** ENTREZ's esearch */
@@ -55,24 +55,16 @@ export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 1000
 	let pmcList = [];
 
 	if (data) {
-		if (typeof data === "string") {
-			// Use JSDOM to parse XML and get all PMCs
-			/** JSDOM document */
-			const dom = new JSDOM(data);
+		/** JSDOM document */
+		const dom = new JSDOM(data);
 
-			pmcList = Array.from(dom.window.document.querySelectorAll("Id")).map((id) => {
-				return id.textContent;
-			});
+		if (typeof data === "string" || typeof data === "object") {
+			// Use JSDOM to parse XML and get all PMCs
+
+			pmcList = Array.from(dom.window.document.querySelectorAll("Id")).map((id) => id.textContent);
 
 			// console feedback
 			console.log(`Found ${pmcList.length} PMCs for ${species.split("_").join(" ")}...`);
-		} else if (typeof data === "object") {
-			pmcList = Array.from(dom.window.document.querySelectorAll("Id")).map((id) => {
-				return id.textContent;
-			});
-
-			// console feedback
-			console.log(`Found ${pmcListXML.length} PMCs for ${species.split("_").join(" ")}...`);
 		}
 	}
 
@@ -122,8 +114,9 @@ export async function retrieveFigures(data) {
 		for (const pmc of pmcList) {
 			// Check if PMC ID has already been retrieved
 			if (!dataRetrieved?.[pmc] && !emptyPubData?.[pmc] && resetIndex <= resetRange) {
-				resetIndex++;
+				resetIndex += 1;
 
+				// eslint-disable-next-line no-await-in-loop, no-loop-func
 				await throttle(async () => {
 					if (!dataRetrieved?.[pmc] && !emptyPubData?.[pmc]) {
 						// console feedback
@@ -179,7 +172,7 @@ export async function retrieveFigures(data) {
 								};
 
 								// Get figures
-								await domClasses.figures.forEach(async (className) => {
+								domClasses.figures.forEach(async (className) => {
 									/** Publication's figures */
 									const figure = html.window.document.querySelectorAll(`.${className}`);
 
@@ -187,7 +180,7 @@ export async function retrieveFigures(data) {
 										// console feedback
 										console.log(`Found figures for ${pmc} using ${className}...`);
 
-										await figure.forEach(async (fig) => {
+										figure.forEach(async (fig) => {
 											/** Name of the figure */
 											const imageName = fig.src?.split("/").pop();
 
@@ -239,7 +232,7 @@ export async function retrieveFigures(data) {
 												currentPubData.figures[imageName] = {};
 
 												/** Figure fount is typically the last set of numbers following a letter or special character in image name */
-												const figureFound = parseInt(imageName.match(/\d+/g)?.pop());
+												const figureFound = parseInt(imageName.match(/\d+/g)?.pop(), 10);
 
 												// console feedback
 												console.log(`Retrieving figure ${imageName} for ${pmc}...`);
@@ -333,7 +326,7 @@ export async function retrieveFigures(data) {
 								}
 							} else {
 								emptyPubData[pmc] = {
-									cause: "Unable to webscrape",
+									cause: "Unable to web scrape",
 								};
 
 								await fs.writeFileSync(
@@ -364,7 +357,7 @@ export async function retrieveFigures(data) {
 			}
 		}
 
-		speciesIndex++;
+		speciesIndex += 1;
 
 		if ((!speciesRange || speciesIndex >= speciesRange) && resetIndex < resetRange) {
 			// console feedback

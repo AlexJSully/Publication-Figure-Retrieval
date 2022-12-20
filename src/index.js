@@ -1,14 +1,12 @@
-// Required packages
+/* eslint-disable no-await-in-loop */
 import * as fs from "fs";
 import lodash from "lodash";
 import throttledQueue from "throttled-queue";
-// Custom imports
-import { getPMCList, retrieveFigures } from "./scripts/data-retrieval.js";
-// Sentry
-import "dotenv/config";
+import "dotenv/config.js";
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
-import { CaptureConsole, Offline } from "@sentry/integrations";
+import { CaptureConsole } from "@sentry/integrations";
+import { getPMCList, retrieveFigures } from "./scripts/data-retrieval.js";
 
 /** Throttled queue for ENTREZ API requests (1 per second) */
 const throttle = throttledQueue(1, 1000);
@@ -57,6 +55,7 @@ async function init(useOACommData = true) {
 	// Go through each species and get the PMID list
 	for (const species of speciesList) {
 		if (!speciesPMIDList[species]) {
+			// eslint-disable-next-line no-loop-func
 			throttle(async () => {
 				/** PMID list for species */
 				let pmidList = await getPMCList(species);
@@ -78,7 +77,7 @@ async function init(useOACommData = true) {
 				speciesPMIDList[species] = pmidList;
 
 				// Increment speciesCount
-				speciesCount++;
+				speciesCount += 1;
 
 				// Write speciesPMIDList to file
 				await fs.writeFileSync("./src/data/species-pmid-list.json", JSON.stringify(speciesPMIDList, null, 2));
@@ -96,7 +95,7 @@ async function init(useOACommData = true) {
 			console.log(`${species.split("_").join(" ")} already has a PMID list, skipping...`);
 
 			// Increment speciesCount
-			speciesCount++;
+			speciesCount += 1;
 
 			if (speciesCount === speciesList.length) {
 				// console feedback
@@ -122,7 +121,6 @@ Sentry.init({
 		new CaptureConsole({
 			levels: ["error"],
 		}),
-		new Offline(),
 	],
 	// Set tracesSampleRate to 1.0 to capture 100%
 	// of transactions for performance monitoring.

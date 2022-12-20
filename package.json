@@ -13,15 +13,18 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js",
+		"eslint": "eslint --fix ./ --ignore-path .gitignore",
+		"eslint:check": "eslint ./ --ignore-path .gitignore",
 		"poststart": "npm start",
+		"prettier": "prettier --write ./",
+		"prettier:check": "prettier --check ./",
 		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js",
-		"prettier": "prettier --write ./"
+		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js"
 	},
 	"dependencies": {
-		"@sentry/integrations": "^7.26.0",
-		"@sentry/node": "^7.26.0",
-		"@sentry/tracing": "^7.26.0",
+		"@sentry/integrations": "^7.28.0",
+		"@sentry/node": "^7.28.0",
+		"@sentry/tracing": "^7.28.0",
 		"axios": "^1.2.1",
 		"dotenv": "^16.0.3",
 		"jsdom": "^20.0.3",
@@ -29,6 +32,12 @@
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
+		"eslint": "^8.30.0",
+		"eslint-config-airbnb": "^19.0.4",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-import": "^2.26.0",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.1"
 	},
 	"bugs": {
