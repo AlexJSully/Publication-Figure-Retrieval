@@ -32,7 +32,7 @@
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
-		"eslint": "^8.30.0",
+		"eslint": "^8.31.0",
 		"eslint-config-airbnb": "^19.0.4",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-import": "^2.26.0",
