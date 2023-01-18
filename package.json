@@ -22,23 +22,23 @@
 		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js"
 	},
 	"dependencies": {
-		"@sentry/integrations": "^7.28.1",
-		"@sentry/node": "^7.28.1",
-		"@sentry/tracing": "^7.28.1",
-		"axios": "^1.2.2",
+		"@sentry/integrations": "^7.31.1",
+		"@sentry/node": "^7.31.1",
+		"@sentry/tracing": "^7.31.1",
+		"axios": "^1.2.3",
 		"dotenv": "^16.0.3",
-		"jsdom": "^20.0.3",
+		"jsdom": "^21.0.0",
 		"lodash": "^4.17.21",
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
-		"eslint": "^8.31.0",
+		"eslint": "^8.32.0",
 		"eslint-config-airbnb": "^19.0.4",
 		"eslint-config-prettier": "^8.6.0",
-		"eslint-plugin-import": "^2.26.0",
+		"eslint-plugin-import": "^2.27.5",
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-prettier": "^4.2.1",
-		"prettier": "^2.8.1"
+		"prettier": "^2.8.3"
 	},
 	"bugs": {
 		"url": "https://github.com/AlexJSully/Publication-Figures-Web-Scraping/issues"
