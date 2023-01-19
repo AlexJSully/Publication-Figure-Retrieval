@@ -1,11 +1,11 @@
 /* eslint-disable no-await-in-loop */
+import { CaptureConsole } from "@sentry/integrations";
+import * as Sentry from "@sentry/node";
+import "@sentry/tracing";
+import "dotenv/config.js";
 import * as fs from "fs";
 import lodash from "lodash";
 import throttledQueue from "throttled-queue";
-import "dotenv/config.js";
-import * as Sentry from "@sentry/node";
-import "@sentry/tracing";
-import { CaptureConsole } from "@sentry/integrations";
 import { getPMCList, retrieveFigures } from "./scripts/data-retrieval.js";
 
 /** Throttled queue for ENTREZ API requests (1 per second) */

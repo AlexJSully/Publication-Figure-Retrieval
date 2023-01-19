@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import * as fs from "fs";
 import axios from "axios";
-import throttledQueue from "throttled-queue";
+import * as fs from "fs";
 import { JSDOM } from "jsdom";
+import throttledQueue from "throttled-queue";
 
 /** Throttled queue for web scraping (1 per second) */
 const throttle = throttledQueue(1, 1000);
