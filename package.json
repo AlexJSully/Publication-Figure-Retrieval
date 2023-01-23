@@ -22,7 +22,7 @@
 		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js"
 	},
 	"dependencies": {
-		"@sentry/integrations": "^7.31.1",
+		"@sentry/integrations": "^7.32.0",
 		"@sentry/node": "^7.31.1",
 		"@sentry/tracing": "^7.31.1",
 		"axios": "^1.2.3",
