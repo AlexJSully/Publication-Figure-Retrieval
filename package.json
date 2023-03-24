@@ -23,7 +23,7 @@
 	},
 	"dependencies": {
 		"@sentry/integrations": "^7.31.1",
-		"@sentry/node": "^7.31.1",
+		"@sentry/node": "^7.45.0",
 		"@sentry/tracing": "^7.31.1",
 		"axios": "^1.2.3",
 		"dotenv": "^16.0.3",
