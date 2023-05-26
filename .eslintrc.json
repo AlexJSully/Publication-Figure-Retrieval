@@ -12,10 +12,11 @@
 	"rules": {
 		"import/default": 2,
 		"import/export": 2,
+		"import/extensions": "warn",
 		"import/named": 2,
 		"import/namespace": 2,
 		"import/no-unresolved": [2, { "commonjs": true, "amd": true }],
-		"import/extensions": "warn",
+		"import/prefer-default-export": "off",
 		"indent": ["error", "tab"],
 		"no-console": "off",
 		"no-continue": "off",

@@ -16,30 +16,31 @@
 		"eslint": "eslint --fix ./ --ignore-path .gitignore",
 		"eslint:check": "eslint ./ --ignore-path .gitignore",
 		"poststart": "npm start",
+		"pre-commit": "npm run prettier && npm run eslint",
 		"prettier": "prettier --write ./",
 		"prettier:check": "prettier --check ./",
 		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js",
 		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js"
 	},
 	"dependencies": {
-		"@sentry/integrations": "^7.31.1",
-		"@sentry/node": "^7.31.1",
-		"@sentry/tracing": "^7.31.1",
-		"axios": "^1.2.3",
+		"@sentry/integrations": "^7.53.1",
+		"@sentry/node": "^7.53.1",
+		"@sentry/tracing": "^7.53.1",
+		"axios": "^1.4.0",
 		"dotenv": "^16.0.3",
-		"jsdom": "^21.0.0",
+		"jsdom": "^22.0.0",
 		"lodash": "^4.17.21",
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^4.0.0",
-		"eslint": "^8.32.0",
+		"@trivago/prettier-plugin-sort-imports": "^4.1.1",
+		"eslint": "^8.41.0",
 		"eslint-config-airbnb": "^19.0.4",
-		"eslint-config-prettier": "^8.6.0",
+		"eslint-config-prettier": "^8.8.0",
 		"eslint-plugin-import": "^2.27.5",
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-prettier": "^4.2.1",
-		"prettier": "^2.8.3"
+		"prettier": "^2.8.8"
 	},
 	"bugs": {
 		"url": "https://github.com/AlexJSully/Publication-Figures-Web-Scraping/issues"
