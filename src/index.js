@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-await-in-loop, import/extensions */
 import { CaptureConsole } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
