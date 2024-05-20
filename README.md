@@ -41,14 +41,6 @@ We aim to make this tool as perfect as possible but unfortunately, there may be 
 
 -   None at the moment... Help us find some!
 
-## Sponsorship
-
-If you want to support my work, you can through the following methods:
-
--   [BTC](3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog) - 3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog
--   [ETH](0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2) - 0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2
--   [PayPal](https://paypal.me/alexjsully) - paypal.me/alexjsully
-
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
@@ -56,6 +48,21 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 ## License
 
 [GLP-2.0](LICENSE.md)
+
+## Maintenance Mode
+
+This project is currently in maintenance mode. This means that:
+
+-   Only critical bug fixes and security updates will be addressed.
+-   New feature requests are unlikely to be implemented.
+
+## Sponsorship
+
+If you want to support my work, you can through the following methods:
+
+-   [BTC](3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog) - 3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog
+-   [ETH](0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2) - 0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2
+-   [PayPal](https://paypal.me/alexjsully) - paypal.me/alexjsully
 
 ## Authors
 
