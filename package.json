@@ -16,11 +16,11 @@
 		"eslint": "eslint --fix ./ --ignore-path .gitignore",
 		"eslint:check": "eslint ./ --ignore-path .gitignore",
 		"poststart": "npm start",
-		"pre-commit": "npm run prettier && npm run eslint",
 		"prettier": "prettier --write ./",
 		"prettier:check": "prettier --check ./",
 		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js",
-		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js"
+		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js",
+		"validate": "npm run prettier && npm run eslint"
 	},
 	"dependencies": {
 		"@sentry/integrations": "^7.61.0",
