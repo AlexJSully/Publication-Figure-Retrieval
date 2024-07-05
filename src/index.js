@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop, import/extensions */
-import { CaptureConsole } from "@sentry/integrations";
+import { captureConsoleIntegration } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
 import "dotenv/config.js";
@@ -118,7 +118,7 @@ async function init(useOACommData = true) {
 Sentry.init({
 	dsn: process.env.SENTRY_DNS,
 	integrations: [
-		new CaptureConsole({
+		captureConsoleIntegration({
 			levels: ["error"],
 		}),
 	],
@@ -128,8 +128,6 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 });
 
-Sentry.configureScope((scope) => {
-	scope.setTag("app-version", process.env.APP_VERSION);
-});
+Sentry.setTag("app-version", process.env.APP_VERSION);
 
 init(false);
