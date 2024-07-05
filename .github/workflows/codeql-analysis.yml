@@ -9,18 +9,22 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
-name: "CodeQL"
+name: 'CodeQL'
 
 on:
     push:
-        branches: [master]
+        branches: ['master']
     pull_request:
-        # The branches below must be a subset of the branches above
-        branches: [master]
+        branches: ['master']
 
 jobs:
     analyze:
         name: Analyze
+        # Runner size impacts CodeQL analysis time. To learn more, please see:
+        #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+        #   - https://gh.io/supported-runners-and-hardware-resources
+        #   - https://gh.io/using-larger-runners
+        # Consider using larger runners for possible analysis time improvements.
         runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
         timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
         permissions:
@@ -34,10 +38,11 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                language: ["javascript-typescript"]
-                # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
-                # Learn more:
-                # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
+                language: ['javascript-typescript']
+                # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
+                # Use only 'java-kotlin' to analyze code written in Java, Kotlin or both
+                # Use only 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
+                # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
         steps:
             - name: Checkout repository
@@ -77,4 +82,4 @@ jobs:
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
               with:
-                  category: "/language:${{matrix.language}}"
+                  category: '/language:${{matrix.language}}'
