@@ -33,6 +33,7 @@
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
+		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
 		"eslint": "^9.6.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-node": "^11.1.0",
