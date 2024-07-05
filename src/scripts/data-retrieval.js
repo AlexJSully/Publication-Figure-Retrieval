@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import axios from "axios";
 import * as fs from "fs";
 import { JSDOM } from "jsdom";
@@ -116,7 +115,6 @@ export async function retrieveFigures(data) {
 			if (!dataRetrieved?.[pmc] && !emptyPubData?.[pmc] && resetIndex <= resetRange) {
 				resetIndex += 1;
 
-				// eslint-disable-next-line no-await-in-loop, no-loop-func
 				await throttle(async () => {
 					if (!dataRetrieved?.[pmc] && !emptyPubData?.[pmc]) {
 						// console feedback
@@ -290,7 +288,8 @@ export async function retrieveFigures(data) {
 														} catch (e) {
 															// console feedback
 															console.log(
-																`Error downloading figure ${imageName} for ${pmc} (${species})`,
+																`Error downloading figure ${imageName} for ${pmc} (${species}). Error response: `,
+																e,
 															);
 														}
 													});
@@ -348,7 +347,7 @@ export async function retrieveFigures(data) {
 							);
 
 							// console feedback
-							console.log(`Failed to retrieve PMC${pmc}...`);
+							console.log(`Failed to retrieve PMC${pmc}... Error response: `, e);
 						}
 					}
 				});

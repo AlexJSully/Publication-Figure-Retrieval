@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop, import/extensions */
 import { captureConsoleIntegration } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
@@ -55,7 +54,6 @@ async function init(useOACommData = true) {
 	// Go through each species and get the PMID list
 	for (const species of speciesList) {
 		if (!speciesPMIDList[species]) {
-			// eslint-disable-next-line no-loop-func
 			throttle(async () => {
 				/** PMID list for species */
 				let pmidList = await getPMCList(species);
