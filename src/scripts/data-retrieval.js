@@ -27,7 +27,7 @@ export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 1000
 	/** What is being searched for */
 	const term = `term=${species}[Organism]&`;
 	/** Maximum number of publications */
-	const retmax = `retmax=${maxIDs}&`;
+	const retmax = `retmax=${maxIDs}`;
 
 	/** API's URL */
 	const url = base + db + term + retmax;
@@ -54,20 +54,18 @@ export async function getPMCList(species = "Arabidopsis thaliana", maxIDs = 1000
 	let pmcList = [];
 
 	if (data) {
+		// Parse the XML string with JSDOM
 		/** JSDOM document */
-		const dom = new JSDOM(data);
+		const dom = new JSDOM(data, { contentType: "text/xml" });
 
-		if (typeof data === "string" || typeof data === "object") {
-			// Use JSDOM to parse XML and get all PMCs
+		// Use JSDOM to parse XML and get all PMCs
+		pmcList = Array.from(dom.window.document.querySelectorAll("Id")).map((id) => id.textContent);
 
-			pmcList = Array.from(dom.window.document.querySelectorAll("Id")).map((id) => id.textContent);
-
-			// console feedback
-			console.log(`Found ${pmcList.length} PMCs for ${species.split("_").join(" ")}...`);
-		}
+		console.log(`Found ${pmcList.length} PMCs for ${species.split("_").join(" ")}...`);
+		return pmcList;
 	}
 
-	// Return PMC list
+	console.error("No data found...");
 	return pmcList;
 }
 
