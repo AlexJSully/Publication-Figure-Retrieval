@@ -8,7 +8,7 @@ This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.n
 
 ## Requirements
 
--   Node.js >= 16.13.1
+-   Node.js >= 20
 -   RAM >= 4GB
 -   Internet connection with greater than 7mb/s download speed
 
