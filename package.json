@@ -20,7 +20,10 @@
 		"prettier:check": "prettier --check ./",
 		"process": "node ./src/scripts/processRaw/process-oa-comm-use-list.js",
 		"start": "node --max-old-space-size=4096 --gc-interval=3500 ./src/index.js",
-		"validate": "npm run prettier && npm run eslint"
+		"test": "jest",
+		"test:coverage": "jest --coverage",
+		"test:watch": "jest --watch",
+		"validate": "npm run prettier && npm run eslint && npm run test:coverage"
 	},
 	"dependencies": {
 		"@sentry/integrations": "^7.114.0",
@@ -33,12 +36,16 @@
 		"throttled-queue": "^2.1.4"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.25.2",
+		"@babel/preset-env": "^7.25.3",
 		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
+		"babel-jest": "^29.7.0",
 		"eslint": "^9.8.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-prettier": "^5.2.1",
 		"globals": "^15.9.0",
+		"jest": "^29.7.0",
 		"prettier": "^3.3.3"
 	},
 	"bugs": {
