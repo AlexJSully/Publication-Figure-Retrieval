@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getPMCList } from "./data-retrieval";
+import { getPMCList } from "./get-pmc-list";
 
 // Mock the axios module
 jest.mock("axios");

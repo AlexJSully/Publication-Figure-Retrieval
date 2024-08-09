@@ -5,7 +5,8 @@ import "dotenv/config.js";
 import * as fs from "fs";
 import lodash from "lodash";
 import throttledQueue from "throttled-queue";
-import { getPMCList, retrieveFigures } from "./scripts/data-retrieval.js";
+import { retrieveFigures } from "./scripts/data-retrieval.js";
+import { getPMCList } from "./scripts/get-pmc-list.js";
 
 /** Throttled queue for ENTREZ API requests (1 per second) */
 const throttle = throttledQueue(1, 1000);
