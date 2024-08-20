@@ -6,6 +6,12 @@ This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.n
 [![GitHub repo size](https://img.shields.io/github/repo-size/AlexJSully/Publication-Figures-Web-Scraping)](https://github.com/AlexJSully/Publication-Figures-Web-Scraping)
 [![GitHub](https://img.shields.io/github/license/AlexJSully/Publication-Figures-Web-Scraping)](https://github.com/AlexJSully/Publication-Figures-Web-Scraping)
 
+## Disclaimer
+
+Please note that as of August 20, 2024, scraping figures from PMC (PubMed Central) publications is no longer permitted under their Copyright Notice ([https://www.ncbi.nlm.nih.gov/pmc/about/copyright/](https://www.ncbi.nlm.nih.gov/pmc/about/copyright/)). Attempting to do so may result in a 403 error and an IP ban from NIH/PMC. Users are fully responsible for ensuring their use of this tool complies with current PMC policies and applicable laws. Use at your own risk.
+
+This code is maintained for educational and historical reference purposes only. While it remains functional, it is not intended for use in scraping PMC data, as this is no longer allowed under current policies. The tool was originally developed for academic research, but due to these policy changes, it is not recommended for use in this capacity anymore.
+
 ## Requirements
 
 -   Node.js >= 20
@@ -59,7 +65,6 @@ If you want to support my work, you can through the following methods:
 
 -   [BTC](3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog) - 3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog
 -   [ETH](0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2) - 0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2
--   [PayPal](https://paypal.me/alexjsully) - paypal.me/alexjsully
 
 ## Authors
 
