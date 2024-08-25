@@ -9,7 +9,7 @@ describe("searchArticlesBySpecies", () => {
 	const query = `${species}[organism]`;
 	const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
 		query,
-	)}&retmode=json&retmax=100000`;
+	)}&retmode=json&retmax=1000000`;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
