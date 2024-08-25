@@ -1,4 +1,4 @@
-# Publication figure web scraping
+# Publication Figure Retrieval Tool
 
 This tool provides a method for scraping through NCBI's [PMC](https://www.ncbi.nlm.nih.gov/labs/pmc/) publications and retrieving (downloading) the figures from open access and publicly available publications.
 

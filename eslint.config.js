@@ -1,8 +1,8 @@
-import eslintPluginNode from "eslint-plugin-node";
-import eslintPluginPrettier from "eslint-plugin-prettier";
-import globals from "globals";
+const eslintPluginPrettier = require("eslint-plugin-prettier");
+const globals = require("globals");
+const eslintPluginNode = require("eslint-plugin-node");
 
-export default [
+module.exports = [
 	{
 		ignores: ["**/*.min.js", ".vscode/**/*", "eslint.config.js", "node_modules/**/*"],
 	},
