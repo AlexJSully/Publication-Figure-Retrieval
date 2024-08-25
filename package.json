@@ -47,11 +47,11 @@
 	],
 	"private": true,
 	"bugs": {
-		"url": "https://github.com/AlexJSully/Publication-Figures-Web-Scraping/issues"
+		"url": "https://github.com/AlexJSully/Publication-Figure-Retrieval/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/AlexJSully/Publication-Figures-Web-Scraping.git"
+		"url": "git+https://github.com/AlexJSully/Publication-Figure-Retrieval.git"
 	},
 	"keywords": [
 		"science",
@@ -60,5 +60,5 @@
 		"publication-data"
 	],
 	"license": "GNU General Public License v2.0",
-	"homepage": "https://github.com/AlexJSully/Publication-Figures-Web-Scraping#readme"
+	"homepage": "https://github.com/AlexJSully/Publication-Figure-Retrieval#readme"
 }

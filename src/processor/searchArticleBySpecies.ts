@@ -22,9 +22,13 @@ export async function searchArticlesBySpecies(
 ): Promise<string[]> {
 	// Construct query for species and open-access filter
 	const query = `${species}[organism]`;
-	const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
+	let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
 		query,
-	)}&retmode=json&retmax=100000`;
+	)}&retmode=json&retmax=1000000`;
+	// Check if there is a NCBI API key available and if so, add it to the URL
+	if (process?.env?.NCBI_API_KEY) {
+		url += `&api_key=${process.env.NCBI_API_KEY}`;
+	}
 
 	try {
 		// Make HTTP request to NCBI E-utilities API to search for articles

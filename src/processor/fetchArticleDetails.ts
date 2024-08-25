@@ -34,7 +34,12 @@ export async function fetchArticleDetails(
 		/** Comma-separated list of PMCIDs. */
 		const ids = batch.join(",");
 		/** The URL to fetch article details for the current batch. */
-		const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=${ids}&retmode=xml`;
+		let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=${ids}&retmode=xml`;
+		// Check if there is a NCBI API key available and if so, add it to the URL
+		if (process?.env?.NCBI_API_KEY) {
+			url += `&api_key=${process.env.NCBI_API_KEY}`;
+		}
+
 		console.log(`Fetching article details for batch ${i + 1}-${i + batch.length}...`);
 
 		try {

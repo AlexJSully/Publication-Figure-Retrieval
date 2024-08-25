@@ -5,7 +5,7 @@ import { searchArticlesBySpecies } from "./processor/searchArticleBySpecies";
 
 // Check if NCBI API key is present in environment variables
 /** The API key for the NCBI E-utilities. */
-const ncbiApiKey = process.env.NCBI_API_KEY;
+const ncbiApiKey = process?.env?.NCBI_API_KEY;
 /**
  * The number of API calls allowed per second.
  * If an API key is provided, we can make up to 10 calls per second.

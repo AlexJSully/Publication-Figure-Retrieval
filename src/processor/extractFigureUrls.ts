@@ -57,6 +57,7 @@ export function extractFigureUrls(
 						// Construct the correct absolute URL
 						/** The absolute URL of the figure graphic. */
 						const absoluteUrl = `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/bin/${figureUrl}`;
+
 						figureUrls.push(absoluteUrl);
 					}
 				});
