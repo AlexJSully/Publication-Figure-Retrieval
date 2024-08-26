@@ -1,6 +1,6 @@
 {
 	"name": "publication-figure-retriever",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "This tool provides a method for retrieving figures from NCBI's PubMed publications using NIH APIs for open access and publicly available publications.",
 	"main": "index.ts",
 	"scripts": {

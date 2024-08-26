@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 To see tags and releases, please go to [Tags](https://github.com/AlexJSully/Publication-Figure-Retrieval/tags) on [GitHub](https://github.com/AlexJSully/Publication-Figure-Retrieval).
 
+## [3.0.1] - 2024-08-26
+
+Feature:
+
+-   Re-added the ability to resume the process if it was canceled
+
 ## [3.0.0] - 2024-08-25
 
 The `Publication Figures Web Scraper` has been renamed to `Publication Figure Retrieval` as it no longer scrapes data from the web. Instead, it retrieves data from the NCBI API. This major change was done to comply with the NCBI's terms of service and policies.
