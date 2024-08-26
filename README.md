@@ -30,17 +30,19 @@ Then run
 npm install
 ```
 
-followed by
+### Running locally
+
+To start and run the publication figure retrieval tool, run the following command:
 
 ```bash
-npm start
+npm run start
 ```
 
-This tool runs within your Node.js environment. On Windows, this script may need to run in administrator mode.
+If you chose to cancel this process at any time, you can resume and continue where you left off by running the same command. It will store the already processed PMC IDs in `build/output/cache/id.json`. To reset the cache, delete the `id.json` file.
 
 ### Usage
 
-The images are downloaded locally within the `build/processor/output` directory.
+The images are downloaded locally within the `build/output` directory. They are organized by species then by publication ID.
 
 ### API Key
 

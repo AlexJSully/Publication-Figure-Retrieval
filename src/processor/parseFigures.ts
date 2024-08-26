@@ -56,7 +56,7 @@ export async function parseFigures(
 			// Download all figures for this article
 			for (const url of figureUrls) {
 				// Create the directory path for species and PMC ID
-				const outputDir = path.join(__dirname, "output", species, pmcId);
+				const outputDir = path.join(__dirname, "../output", species, pmcId);
 				if (!fs.existsSync(outputDir)) {
 					fs.mkdirSync(outputDir, { recursive: true });
 				}
