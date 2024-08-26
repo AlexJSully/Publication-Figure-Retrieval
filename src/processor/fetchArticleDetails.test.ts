@@ -11,12 +11,26 @@ describe("fetchArticleDetails", () => {
 	const throttle = jest.fn((fn) => fn());
 	const pmids = ["PMC123456", "PMC654321"];
 	const species = "Homo sapiens";
-	const cachedIDsFilePath = path.resolve(__dirname, "../../output/data/id.json");
+	const cachedIDsFilePath = path.resolve(__dirname, "../output/cache/id.json");
 
 	beforeEach(() => {
 		jest.clearAllMocks();
+		const dir = path.dirname(cachedIDsFilePath);
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir, { recursive: true });
+		}
 		if (fs.existsSync(cachedIDsFilePath)) {
 			fs.unlinkSync(cachedIDsFilePath);
+		}
+		// Ensure the cached ID file is empty
+		fs.writeFileSync(cachedIDsFilePath, JSON.stringify([]));
+	});
+
+	afterEach(() => {
+		// Delete the output directory
+		const dir = path.dirname(cachedIDsFilePath);
+		if (fs.existsSync(dir)) {
+			fs.rmdirSync(dir, { recursive: true });
 		}
 	});
 
