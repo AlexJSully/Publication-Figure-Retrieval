@@ -1,4 +1,6 @@
 import axios from "axios";
+import fs from "fs";
+import path from "path";
 import { parseFigures } from "./parseFigures";
 
 /**
@@ -19,34 +21,64 @@ import { parseFigures } from "./parseFigures";
 export async function fetchArticleDetails(
 	/** The throttling function to control the rate of API requests. */
 	throttle: any,
-	/** An array of PMCIDs to fetch details for. */
+	/** An array of PMC IDs to fetch details for. */
 	pmids: string[],
 	/** The species name to be used in the processing of figures. */
 	species: string,
 ): Promise<void> {
-	/** Number of PMCIDs per batch. */
+	/** Number of PMC IDs per batch. */
 	const batchSize = 50;
 
+	// Grab cached IDs
+	/** Path to the cached IDs file. */
+	const cachedIDsFilePath = path.resolve(__dirname, "../output/cache/id.json");
+	/** Cached IDs list. */
+	let cachedIDs: string[] = [];
+	// Check if the cached IDs file exists
+	if (fs.existsSync(cachedIDsFilePath)) {
+		const data = fs.readFileSync(cachedIDsFilePath, "utf-8");
+		cachedIDs = JSON.parse(data);
+	} else {
+		// Create the directory if it doesn't exist
+		fs.mkdirSync(path.dirname(cachedIDsFilePath), { recursive: true });
+	}
+
+	// Get article details based on PMC IDs
 	for (let i = 0; i < pmids.length; i += batchSize) {
-		// Extract a batch of 50 PMCIDs
-		/** A batch of 50 PMCIDs. */
+		// Extract a batch of 50 PMC IDs
 		const batch = pmids.slice(i, i + batchSize);
-		/** Comma-separated list of PMCIDs. */
-		const ids = batch.join(",");
-		/** The URL to fetch article details for the current batch. */
+
+		// Filter out IDs that are already cached
+		const newBatch = batch.filter((id) => !cachedIDs.includes(id));
+
+		if (newBatch.length === 0) {
+			console.log(
+				`All IDs in ${species.replace("_", " ")} batch ${i + 1}-${i + batch.length} are already cached.`,
+			);
+
+			continue;
+		}
+
+		/** Comma-separated string of PMC IDs for the batch. */
+		const ids = newBatch.join(",");
+		/** URL for fetching article details from the NCBI API. */
 		let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=${ids}&retmode=xml`;
-		// Check if there is a NCBI API key available and if so, add it to the URL
+		// Add the API key if available
 		if (process?.env?.NCBI_API_KEY) {
 			url += `&api_key=${process.env.NCBI_API_KEY}`;
 		}
 
-		console.log(`Fetching article details for batch ${i + 1}-${i + batch.length}...`);
+		console.log(
+			`Fetching ${species.replace("_", " ")} article details for batch ${i + 1}-${i + newBatch.length}...`,
+		);
 
 		try {
-			// Make HTTP request to fetch article details in XML format for the current batch
-			/** The response from the API request. */
 			const response = await throttle(async () => await axios.get(url));
 			await parseFigures(throttle, response.data, species);
+
+			// Add the new IDs to the cached list and write to the file
+			cachedIDs.push(...newBatch);
+			fs.writeFileSync(cachedIDsFilePath, JSON.stringify(cachedIDs, null, 2));
 		} catch (error) {
 			console.error("Error fetching article details:", error);
 		}
