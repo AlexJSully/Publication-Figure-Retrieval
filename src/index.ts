@@ -29,7 +29,7 @@ async function main() {
 		/** Array of PubMed Central IDs (PMCIDs) for the articles found. */
 		const pmids = await searchArticlesBySpecies(throttle, species);
 
-		if (pmids.length > 0) {
+		if (pmids?.length > 0) {
 			await fetchArticleDetails(throttle, pmids, species);
 		} else {
 			console.log(`No articles found for the species: ${species}.`);

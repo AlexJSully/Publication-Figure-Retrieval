@@ -43,6 +43,12 @@ export async function fetchArticleDetails(
 		fs.mkdirSync(path.dirname(cachedIDsFilePath), { recursive: true });
 	}
 
+	// Check if PMIDs array is undefined/null or empty
+	if (!pmids || pmids.length === 0) {
+		console.log(`No PMC IDs provided for ${species.replace("_", " ")}.`);
+		return;
+	}
+
 	// Get article details based on PMC IDs
 	for (let i = 0; i < pmids.length; i += batchSize) {
 		// Extract a batch of 50 PMC IDs
