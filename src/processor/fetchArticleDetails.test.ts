@@ -75,4 +75,16 @@ describe("fetchArticleDetails", () => {
 
 		expect(axios.get).toHaveBeenCalledTimes(1); // Should not call axios.get again
 	});
+
+	it("should handle empty PMID array gracefully", async () => {
+		const emptyPmids: string[] = [];
+		const consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+		await fetchArticleDetails(throttle, emptyPmids, species);
+
+		expect(axios.get).not.toHaveBeenCalled();
+		expect(consoleLogSpy).toHaveBeenCalledWith("No PMC IDs provided for Homo sapiens.");
+
+		consoleLogSpy.mockRestore();
+	});
 });
