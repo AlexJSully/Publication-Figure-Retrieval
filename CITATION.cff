@@ -20,7 +20,7 @@ contact:
 identifiers:
     - type: url
       value: "https://github.com/AlexJSully/Publication-Figure-Retrieval"
-repository-code: "https://github.com/AlexJSully/AlexJSully-Portfolio"
+repository-code: "https://github.com/AlexJSully/Publication-Figure-Retrieval"
 url: "https://github.com/AlexJSully/Publication-Figure-Retrieval"
 abstract: >-
     This tool provides a method for retrieving publication figure images from NIH's Entrez API based on a list of species.
