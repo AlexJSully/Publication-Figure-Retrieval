@@ -4,6 +4,7 @@
 	"description": "This tool provides a method for retrieving figures from NCBI's PubMed publications using NIH APIs for open access and publicly available publications.",
 	"main": "index.ts",
 	"scripts": {
+		"audit:fix": "npm i && npm audit fix",
 		"build": "tsc",
 		"eslint": "eslint --fix ./",
 		"eslint:check": "eslint ./",
@@ -16,25 +17,24 @@
 		"validate": "npm run prettier && npm run eslint && npm run test:coverage && npm run build"
 	},
 	"dependencies": {
-		"axios": "^1.7.7",
-		"fs": "^0.0.1-security",
+		"axios": "^1.10.0",
 		"throttled-queue": "^2.1.4",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
-		"@types/jest": "^29.5.12",
-		"@types/node": "^22.5.4",
+		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
+		"@types/jest": "^30.0.0",
+		"@types/node": "^24.0.12",
 		"@types/xml2js": "^0.4.14",
-		"eslint": "^9.10.0",
-		"eslint-config-prettier": "^9.1.0",
+		"eslint": "^9.30.1",
+		"eslint-config-prettier": "^10.1.5",
 		"eslint-plugin-node": "^11.1.0",
-		"eslint-plugin-prettier": "^5.2.1",
-		"globals": "^15.9.0",
-		"jest": "^29.7.0",
-		"prettier": "^3.3.3",
-		"ts-jest": "^29.2.5",
-		"typescript": "^5.6.2"
+		"eslint-plugin-prettier": "^5.5.1",
+		"globals": "^16.3.0",
+		"jest": "^30.0.4",
+		"prettier": "^3.6.2",
+		"ts-jest": "^29.4.0",
+		"typescript": "^5.8.3"
 	},
 	"contributors": [
 		{
