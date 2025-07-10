@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: Publication Figure Retrieval Tool
+message: >-
+    Open-source code for the Publication Figure Retrieval CLI
+    tool, which retrieves publication figure images from NIH's Entrez
+    API based on a list of species.
+type: software
+authors:
+    - given-names: Alexander
+      family-names: Sullivan
+      orcid: "https://orcid.org/0000-0002-4463-4473"
+      email: alexjsully.connect@outlook.com
+contact:
+    - email: alexjsully.connect@outlook.com
+      family-names: Sullivan
+      given-names: Alexander
+      country: CA
+      orcid: "https://orcid.org/0000-0002-4463-4473"
+      website: "https://alexjsully.me/"
+identifiers:
+    - type: url
+      value: "https://github.com/AlexJSully/Publication-Figure-Retrieval"
+repository-code: "https://github.com/AlexJSully/AlexJSully-Portfolio"
+url: "https://github.com/AlexJSully/Publication-Figure-Retrieval"
+abstract: >-
+    This tool provides a method for retrieving publication figure images from NIH's Entrez API based on a list of species.
+keywords:
+    - bioinformatics
+    - publication data
+    - science
+license: GPL-3.0
+commit: 740b403cf6575e00471013b1664339caa8ad61c3
+version: 3.0.1
+date-released: "2024-08-26"
