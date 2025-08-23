@@ -27,7 +27,7 @@ git clone https://github.com/AlexJSully/Publication-Figure-Retrieval.git
 Then run
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Running locally
@@ -52,7 +52,7 @@ If you have an API key, create a `.env` file in the root directory and add your 
 NCBI_API_KEY=your_api_key_here
 ```
 
-With an API key, the tool can retrieve up to 10 calls per second instead of 3. Details on obtaining an API key can be found [here](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/).
+With an API key, the tool can retrieve up to 10 calls per second instead of 3. Details on obtaining an API key can be found in the [NCBI API key documentation](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/).
 
 ## Known Issues
 
