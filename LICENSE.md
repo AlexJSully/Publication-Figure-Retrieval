@@ -1,4 +1,4 @@
-### GNU GENERAL PUBLIC LICENSE
+# GNU GENERAL PUBLIC LICENSE
 
 Version 2, June 1991
 
@@ -8,7 +8,7 @@ Version 2, June 1991
     Everyone is permitted to copy and distribute verbatim copies
     of this license document, but changing it is not allowed.
 
-### Preamble
+## Preamble
 
 The licenses for most software are designed to take away your freedom
 to share and change it. By contrast, the GNU General Public License is
