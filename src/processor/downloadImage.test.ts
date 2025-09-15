@@ -14,7 +14,7 @@ describe("Security Tests - Axios Data URI DoS Vulnerability", () => {
 	});
 
 	it("should allow legitimate HTTP/HTTPS URLs", async () => {
-		// Test case 3: Ensure legitimate URLs still work
+		// Ensure legitimate URLs still work
 		const legitimateUrl = "https://example.com/image.jpg";
 		const mockResponse = {
 			data: {
