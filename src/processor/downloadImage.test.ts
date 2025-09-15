@@ -53,7 +53,7 @@ describe("Security Tests - Axios Data URI DoS Vulnerability", () => {
 	});
 
 	it("should enforce content length limits if implemented", async () => {
-		// Test case 5: Verify that if maxContentLength is implemented, it's respected
+		// Verify that if maxContentLength is implemented, it's respected
 		const legitimateUrl = "https://example.com/large-image.jpg";
 
 		// Mock axios to simulate a response that exceeds content length limits
