@@ -4,7 +4,14 @@ const eslintPluginNode = require("eslint-plugin-node");
 
 module.exports = [
 	{
-		ignores: ["**/*.min.js", ".vscode/**/*", "eslint.config.js", "node_modules/**/*"],
+		ignores: [
+			"**/*.min.js",
+			".vscode/**/*",
+			"eslint.config.js",
+			"node_modules/**/*",
+			"build/**/*",
+			"coverage/**/*",
+		],
 	},
 	{
 		languageOptions: {
