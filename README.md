@@ -1,10 +1,19 @@
 # Publication Figure Retrieval Tool
 
-This tool provides a method for retrieving figures from NCBI's [PMC](https://www.ncbi.nlm.nih.gov/labs/pmc/) publications using the Entrez API.
+This tool provides a method for retrieving figures from NCBI's [PMC](https://www.ncbi.nlm.nih.gov/labs/pmc/) publications using the Entrez API. The tool systematically searches for publications related to specific plant species and downloads associated figures for research and analysis purposes.
 
 [![Follow on Twitter](https://img.shields.io/twitter/follow/alexjsully?style=social)](https://twitter.com/alexjsully)
 [![GitHub repo size](https://img.shields.io/github/repo-size/AlexJSully/Publication-Figure-Retrieval)](https://github.com/AlexJSully/Publication-Figure-Retrieval)
 [![GitHub](https://img.shields.io/github/license/AlexJSully/Publication-Figure-Retrieval)](https://github.com/AlexJSully/Publication-Figure-Retrieval)
+
+## Features
+
+- **Automated Species Search**: Searches for publications related to 30+ plant species
+- **Figure Extraction**: Downloads high-quality figures from PMC articles
+- **Resume Capability**: Caches processed PMC IDs to resume interrupted downloads
+- **Rate Limiting**: Respects NCBI API limits (3 requests/second, 10 with API key)
+- **Batch Processing**: Efficiently processes thousands of articles per species
+- **Organized Output**: Structures downloaded figures by species and publication ID
 
 ## Disclaimer
 
@@ -12,47 +21,83 @@ This code is maintained for educational and historical reference purposes only. 
 
 ## Requirements
 
-- Node.js >= 20
-- RAM >= 4GB
-- Internet connection with greater than 7mb/s download speed
+- **Node.js**: Version 20 or higher
+- **RAM**: 4GB minimum
+- **Internet**: Stable connection with >7MB/s download speed
 
 ## Installation & Setup
 
-If you would like to run or modify the publication figure retrieval tool locally, clone the repository with git by running the following command:
+### Quick Start
+
+Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/AlexJSully/Publication-Figure-Retrieval.git
-```
-
-Then run
-
-```bash
+cd Publication-Figure-Retrieval
 npm ci
 ```
 
-### Running locally
+### API Key Configuration (Recommended)
 
-To start and run the publication figure retrieval tool, run the following command:
+To increase API rate limits from 3 to 10 requests per second, obtain an NCBI API key:
 
-```bash
-npm run start
-```
-
-If you chose to cancel this process at any time, you can resume and continue where you left off by running the same command. It will store the already processed PMC IDs in `build/output/cache/id.json`. To reset the cache, delete the `id.json` file.
-
-### Usage
-
-The images are downloaded locally within the `build/output` directory. They are organized by species then by publication ID.
-
-### API Key
-
-If you have an API key, create a `.env` file in the root directory and add your API key as follows:
+1. Visit [NCBI API Key Documentation](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/)
+2. Create a `.env` file in the project root:
 
 ```bash
 NCBI_API_KEY=your_api_key_here
 ```
 
-With an API key, the tool can retrieve up to 10 calls per second instead of 3. Details on obtaining an API key can be found in the [NCBI API key documentation](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/).
+### Running the Tool
+
+Start the figure retrieval process:
+
+```bash
+npm run start
+```
+
+The tool will:
+
+1. Process each species from `src/data/species.json`
+2. Search PMC for related articles
+3. Download figures to `build/output/[species_name]/`
+4. Cache progress in `build/output/cache/id.json`
+
+### Resume Capability
+
+If interrupted, simply run `npm run start` again. The tool will:
+
+- Check the cache for already processed PMC IDs
+- Resume from where it left off
+- Skip duplicate downloads
+
+To reset and start fresh, delete the cache file:
+
+```bash
+rm build/output/cache/id.json
+```
+
+## Output Structure
+
+Downloaded figures are organized in a structured hierarchy:
+
+```text
+build/output/
+├── cache/
+│   └── id.json                    # Cached PMC IDs for resume capability
+├── Arabidopsis_thaliana/
+│   ├── PMC123456/
+│   │   ├── figure1.jpg
+│   │   ├── figure2.png
+│   │   └── metadata.json          # Article metadata
+│   └── PMC789012/
+│       └── figure1.svg
+├── Cannabis_sativa/
+│   └── PMC345678/
+│       ├── figure1.jpg
+│       └── figure2.tiff
+└── [other_species]/
+```
 
 ## Known Issues
 
@@ -60,15 +105,15 @@ We aim to make this tool as perfect as possible but unfortunately, there may be 
 
 - None at the moment... Help us find some!
 
-## Contributing
+## Documentation
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+For comprehensive documentation, see the [`docs/`](docs/) folder:
 
-Before contributing, ensure that all tests pass by running:
-
-```bash
-npm run validate
-```
+- [**Getting Started**](docs/index.md) - Complete overview and setup guide
+- [**Architecture**](docs/architecture/) - Technical architecture and design decisions
+- [**Usage Examples**](docs/usage/examples/) - Detailed usage examples and troubleshooting
+- [**API Reference**](docs/usage/api/) - Complete API documentation
+- [**Contributing**](docs/contributing/) - Development setup and contribution guidelines
 
 ## License
 

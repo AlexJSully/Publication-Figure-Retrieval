@@ -6,4 +6,5 @@ module.exports = {
 	testEnvironment: "node",
 	testMatch: ["**/*.test.ts", "**/*.spec.ts", "**/*.test.js", "**/*.spec.js", "**/*.*_test.js", "**/*.*_test.ts"],
 	testPathIgnorePatterns: ["/node_modules/", "/build/"],
+	verbose: true,
 };
