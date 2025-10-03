@@ -9,50 +9,50 @@ Please note we have a code of conduct, please follow it in all your interactions
 Before committing or creating a Pull Request, please ensure your changes do not break the project by running the following checks locally:
 
 1. **Format and Lint**
-	 - Run Prettier to auto-format code:
+    - Run Prettier to auto-format code:
 
-		 ```bash
-		 npm run prettier
-		 ```
+        ```bash
+        npm run prettier
+        ```
 
-	 - Run ESLint to check/fix linting issues:
+    - Run ESLint to check/fix linting issues:
 
-		 ```bash
-		 npm run eslint
-		 ```
+        ```bash
+        npm run eslint
+        ```
 
-	 - Run Markdown linting for documentation:
+    - Run Markdown linting for documentation:
 
-		 ```bash
-		 npm run lint:markdown
-		 ```
+        ```bash
+        npm run lint:markdown
+        ```
 
 2. **Run Tests**
-	 - Run all unit tests:
+    - Run all unit tests:
 
-		 ```bash
-		 npm test
-		 ```
+        ```bash
+        npm test
+        ```
 
-	 - (Optional) Check test coverage:
+    - (Optional) Check test coverage:
 
-		 ```bash
-		 npm run test:coverage
-		 ```
+        ```bash
+        npm run test:coverage
+        ```
 
 3. **Build**
-	 - Ensure the TypeScript build completes without errors:
+    - Ensure the TypeScript build completes without errors:
 
-		 ```bash
-		 npm run build
-		 ```
+        ```bash
+        npm run build
+        ```
 
 4. **Full Validation**
-	 - You can run all of the above in one step:
+    - You can run all of the above in one step:
 
-		 ```bash
-		 npm run validate
-		 ```
+        ```bash
+        npm run validate
+        ```
 
 Please make sure all of these steps pass before submitting your changes. This helps maintain code quality and ensures a smooth review process.
 

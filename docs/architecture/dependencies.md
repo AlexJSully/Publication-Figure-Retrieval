@@ -1,4 +1,3 @@
-
 # Open Source and API Acknowledgements
 
 This project makes use of the following open-source dependencies and APIs:
@@ -32,8 +31,8 @@ We thank the maintainers and contributors of these open-source projects for thei
 This tool relies on the following public APIs and services:
 
 - **NCBI E-utilities API** ([documentation](https://www.ncbi.nlm.nih.gov/books/NBK25501/))
-  - Used for searching and retrieving publication metadata and full-text articles from PubMed Central (PMC).
+    - Used for searching and retrieving publication metadata and full-text articles from PubMed Central (PMC).
 - **PMC**
-  - Used for retrieving figure images from open-access publications.
+    - Used for retrieving figure images from open-access publications.
 
 We gratefully acknowledge the NCBI and NIH for providing these valuable public resources.
