@@ -1,4 +1,4 @@
-import throttledQueue from "throttled-queue";
+import { throttledQueue } from "throttled-queue";
 import speciesData from "./data/species.json";
 import { fetchArticleDetails } from "./processor/fetchArticleDetails";
 import { searchArticlesBySpecies } from "./processor/searchArticleBySpecies";
@@ -15,7 +15,10 @@ const ncbiApiKey = process?.env?.NCBI_API_KEY;
 let callsPerSecond = ncbiApiKey ? 10 : 3;
 
 /** Throttled queue for the API */
-const throttle = throttledQueue(callsPerSecond, 1000);
+const throttle = throttledQueue({
+	maxPerInterval: callsPerSecond,
+	interval: 1000,
+});
 
 // Read species from species.json
 /** The list of species to search for. */
