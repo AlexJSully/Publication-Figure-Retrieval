@@ -19,24 +19,24 @@
 		"validate": "npm run prettier && npm run eslint && npm run lint:markdown && npm run test && npm run build"
 	},
 	"dependencies": {
-		"axios": "^1.12.2",
+		"axios": "^1.13.2",
 		"throttled-queue": "^3.0.0",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
+		"@trivago/prettier-plugin-sort-imports": "^6.0.0",
 		"@types/jest": "^30.0.0",
-		"@types/node": "^24.6.2",
+		"@types/node": "^24.10.1",
 		"@types/xml2js": "^0.4.14",
-		"eslint": "^9.36.0",
+		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-prettier": "^5.5.4",
-		"globals": "^16.4.0",
+		"globals": "^16.5.0",
 		"jest": "^30.2.0",
 		"markdownlint-cli": "^0.45.0",
 		"prettier": "^3.6.2",
-		"ts-jest": "^29.4.4",
+		"ts-jest": "^29.4.5",
 		"typescript": "^5.9.3"
 	},
 	"contributors": [
