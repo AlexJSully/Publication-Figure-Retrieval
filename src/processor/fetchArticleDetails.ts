@@ -1,6 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
+import type { ThrottleFunction } from "../types";
 import { parseFigures } from "./parseFigures";
 
 /**
@@ -20,7 +21,7 @@ import { parseFigures } from "./parseFigures";
  */
 export async function fetchArticleDetails(
 	/** The throttling function to control the rate of API requests. */
-	throttle: any,
+	throttle: ThrottleFunction,
 	/** An array of PMC IDs to fetch details for. */
 	pmids: string[],
 	/** The species name to be used in the processing of figures. */
@@ -85,8 +86,9 @@ export async function fetchArticleDetails(
 			// Add the new IDs to the cached list and write to the file
 			cachedIDs.push(...newBatch);
 			fs.writeFileSync(cachedIDsFilePath, JSON.stringify(cachedIDs, null, 2));
-		} catch (error) {
-			console.error("Error fetching article details:", error);
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.error("Error fetching article details:", errorMessage, { species, batch: i });
 		}
 	}
 }

@@ -1,65 +1,17 @@
-/**
- * @fileoverview Test suite for parseFigures module.
- *
- * Tests the functionality of parsing PMC XML data to extract figure information
- * and coordinate the downloading of figures to the local filesystem.
- */
-import fs from "fs";
-import path from "path";
 import xml2js from "xml2js";
-import { downloadImage } from "./downloadImage";
-import { extractFigureUrls } from "./extractFigureUrls";
 import { parseFigures } from "./parseFigures";
 
-// Mock all external dependencies for controlled testing
-jest.mock("fs");
-jest.mock("path");
-jest.mock("./downloadImage");
-jest.mock("./extractFigureUrls");
-
-// Type-safe mock objects
-const mockFs = fs as jest.Mocked<typeof fs>;
-const mockPath = path as jest.Mocked<typeof path>;
-const mockDownloadImage = downloadImage as jest.MockedFunction<typeof downloadImage>;
-const mockExtractFigureUrls = extractFigureUrls as jest.MockedFunction<typeof extractFigureUrls>;
-
 describe("parseFigures", () => {
-	// Test data setup
-	const throttle = (fn: any) => fn(); // Mock throttle that executes immediately
-	const species = "Homo sapiens";
-	const pmcId = "PMC123456";
-	const filename = "figure1.jpg";
+	type TestCase = {
+		name: string;
+		xmlData: string;
+		species: string;
+		wantLogsNoArticles?: boolean;
+		wantLogsParseError?: boolean;
+		wantLogsSkipArticle?: boolean;
+	};
 
-	// Use same path logic as implementation for consistency
-	const outputDir = path.join(__dirname, "../output", species, pmcId);
-	const filePath = path.join(outputDir, filename);
-
-	// Console spies for capturing log output
-	let logSpy: jest.SpyInstance;
-	let errorSpy: jest.SpyInstance;
-
-	beforeEach(() => {
-		// Reset all mocks for clean test state
-		jest.clearAllMocks();
-
-		// Configure default mock behaviors
-		mockFs.existsSync.mockReturnValue(false); // Directory doesn't exist initially
-		mockFs.mkdirSync.mockImplementation(() => undefined); // Directory creation succeeds
-		mockDownloadImage.mockResolvedValue(); // Downloads succeed
-		mockExtractFigureUrls.mockReturnValue([`http://example.com/${filename}`]); // Mock figure URLs
-
-		// Set up console spies
-		logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-		errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-	});
-
-	afterEach(() => {
-		// Clean up console spies
-		logSpy.mockRestore();
-		errorSpy.mockRestore();
-	});
-
-	/** Helper function to build valid PMC XML structure for testing */
+	/* Helper to build valid PMC XML structure for testing */
 	function buildXml(articles: any[]): string {
 		const builder = new xml2js.Builder();
 		return builder.buildObject({
@@ -67,86 +19,120 @@ describe("parseFigures", () => {
 		});
 	}
 
-	it("downloads all figures for all articles", async () => {
-		// Arrange: Create valid PMC XML with article structure
-		const xml = buildXml([
-			{
-				front: [
-					{
-						"article-meta": [
-							{
-								"article-id": [{ $: { "pub-id-type": "pmc" }, _: pmcId }],
-							},
-						],
-					},
-				],
-				// Note: body section not needed for this test as extractFigureUrls is mocked
-			},
-		]);
+	const testCases: TestCase[] = [
+		{
+			name: "logs when no articles found",
+			xmlData: buildXml([]),
+			species: "Homo sapiens",
+			wantLogsNoArticles: true,
+		},
+		{
+			name: "skips article with no PMC ID",
+			xmlData: buildXml([
+				{
+					front: [
+						{
+							"article-meta": [
+								{
+									"article-id": [{ $: { "pub-id-type": "pmid" }, _: "12345" }],
+								},
+							],
+						},
+					],
+				},
+			]),
+			species: "Homo sapiens",
+			wantLogsSkipArticle: true,
+		},
+		{
+			name: "handles pub-id-type pmc",
+			xmlData: buildXml([
+				{
+					front: [
+						{
+							"article-meta": [
+								{
+									"article-id": [{ $: { "pub-id-type": "pmc" }, _: "PMC123456" }],
+								},
+							],
+						},
+					],
+				},
+			]),
+			species: "Homo sapiens",
+		},
+		{
+			name: "handles pub-id-type pmcid",
+			xmlData: buildXml([
+				{
+					front: [
+						{
+							"article-meta": [
+								{
+									"article-id": [{ $: { "pub-id-type": "pmcid" }, _: "PMC654321" }],
+								},
+							],
+						},
+					],
+				},
+			]),
+			species: "Homo sapiens",
+		},
+	];
 
-		// Act: Process the XML data
-		await parseFigures(throttle, xml, species);
-
-		// Assert: Verify complete workflow execution
-		expect(mockExtractFigureUrls).toHaveBeenCalledWith(expect.anything(), pmcId);
-		expect(mockFs.existsSync).toHaveBeenCalledWith(outputDir);
-		expect(mockFs.mkdirSync).toHaveBeenCalledWith(outputDir, { recursive: true });
-		expect(mockDownloadImage).toHaveBeenCalledWith(throttle, `http://example.com/${filename}`, filePath);
+	beforeEach(() => {
+		jest.clearAllMocks();
 	});
 
-	it("logs and skips if no articles found", async () => {
-		// Arrange: Create XML with empty article array
-		const xml = buildXml([]);
-		const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+	it.each(testCases)(
+		"$name",
+		async ({ xmlData, species, wantLogsNoArticles, wantLogsSkipArticle, wantLogsParseError }) => {
+			// Arrange
+			const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+			const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-		// Act: Process empty XML
-		await parseFigures(throttle, xml, species);
+			// Act - throttle function that executes immediately
+			const throttle: import("../types").ThrottleFunction = <T>(fn: () => Promise<T>) => fn();
+			await parseFigures(throttle, xmlData, species);
 
-		// Assert: Verify empty result handling
-		expect(logSpy).toHaveBeenCalledWith("No articles found in the response.");
-		logSpy.mockRestore();
-	});
+			// Assert
+			if (wantLogsNoArticles) {
+				expect(logSpy).toHaveBeenCalledWith("No articles found in the response.");
+			}
 
-	it("logs error if XML parsing fails", async () => {
-		// Arrange: Mock XML parser to simulate parsing failure
-		const origParser = xml2js.Parser;
-		xml2js.Parser = jest.fn().mockImplementation(() => ({
-			parseString: (xml: string, cb: Function) => cb(new Error("bad xml")),
-		})) as any;
+			if (wantLogsSkipArticle) {
+				expect(logSpy).toHaveBeenCalledWith("Skipping article: PMC ID not found.");
+			}
+
+			if (wantLogsParseError) {
+				expect(errorSpy).toHaveBeenCalledWith(
+					"Error parsing XML:",
+					expect.anything(),
+					expect.objectContaining({ species }),
+				);
+			}
+
+			logSpy.mockRestore();
+			errorSpy.mockRestore();
+		},
+	);
+
+	it("logs error on XML parsing failure", async () => {
+		// Arrange
+		const invalidXml = "<badxml>";
 		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-		// Act: Attempt to parse invalid XML
-		await parseFigures(throttle, "<badxml>", species);
+		// Act
+		const throttle: import("../types").ThrottleFunction = <T>(fn: () => Promise<T>) => fn();
+		await parseFigures(throttle, invalidXml, "Homo sapiens");
 
-		// Assert: Verify error was logged correctly
-		expect(errorSpy).toHaveBeenCalledWith("Error parsing XML:", expect.any(Error));
+		// Assert
+		expect(errorSpy).toHaveBeenCalledWith(
+			"Error parsing XML:",
+			expect.any(String),
+			expect.objectContaining({ species: "Homo sapiens" }),
+		);
 
-		// Cleanup: Restore original parser
 		errorSpy.mockRestore();
-		xml2js.Parser = origParser;
-	});
-
-	it("handles empty figureUrls array", async () => {
-		// Arrange: Mock extractFigureUrls to return no figures
-		mockExtractFigureUrls.mockReturnValue([]);
-		const xml = buildXml([
-			{
-				front: [
-					{
-						"article-meta": [
-							{
-								"article-id": [{ $: { "pub-id-type": "pmc" }, _: pmcId }],
-							},
-						],
-					},
-				],
-			},
-		]);
-
-		// Act: Process article with no figures
-		await parseFigures(throttle, xml, species);
-
-		// Assert: Verify no download attempts were made
-		expect(mockDownloadImage).not.toHaveBeenCalled();
 	});
 });

@@ -38,8 +38,8 @@ graph TD
     D --> E[Get Article PMC IDs]
     E --> F[Fetch Article Details]
     F --> G[Parse XML Response]
-    G --> H[Extract Figure URLs]
-    H --> I[Download Figures]
+    G --> H[Download Article Package]
+    H --> I[Extract Images from Package]
     I --> J[Save to Species/PMCID Directory]
     J --> K{More Species?}
     K -->|Yes| C
@@ -102,10 +102,10 @@ npm run start
 
 The tool will:
 
-1. Read species from `src/data/species.json`
-2. Search PMC for each species
-3. Download figures to `build/output/[species]/[pmcid]/`
-4. Cache progress in `build/output/cache/id.json`
+1. Read species from [`src/data/species.json`](../src/data/species.json)
+2. Search PMC for each species (see [`src/processor/searchArticleBySpecies.ts`](../src/processor/searchArticleBySpecies.ts))
+3. For each article: fetch article XML, identify the PMC ID, download the article package (.tar.gz) and extract images into `build/output/[species]/[pmcid]/` (see [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts))
+4. Cache progress in `build/output/cache/id.json` to enable resume
 
 ### With API Key (Recommended)
 
@@ -141,10 +141,9 @@ sequenceDiagram
     Fetch->>PMC: efetch.fcgi?db=pmc&id=batch
     PMC-->>Fetch: XML article data
 
-    Fetch->>Parse: parseFigures(xmlData)
-    Parse->>Parse: extractFigureUrls()
-    Parse->>Download: downloadImage(figureUrl)
-    Download-->>Parse: Downloaded figure
+    Fetch->Parse: parseFigures(xmlData)
+    Parse->>Download: downloadArticlePackage(pmcId)
+    Download-->>Parse: Extracted images saved to disk
     Parse-->>User: Organized files
 ```
 

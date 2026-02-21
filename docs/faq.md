@@ -11,12 +11,12 @@ The Publication Figure Retrieval Tool is an open-source Node.js application that
 ### What formats are supported?
 
 - **Input**: Species names (scientific and common names)
-- **Output**: JPEG images from publication figures
+- **Output**: Image formats extracted from article packages; supported extensions are defined in the code (`IMAGE_EXTENSIONS`) and include common formats such as `jpg`, `png`, `tiff`, `gif`, and `svg` (see [`src/constants.ts`](../src/constants.ts)).
 - **Data**: JSON metadata files with article and figure information
 
 ### Is this tool free to use?
 
-Yes, this is an open-source tool released under the MIT License. However, please respect the NCBI API usage guidelines and publication copyright restrictions.
+The project is open-source; consult the repository [`package.json`](../package.json) for the declared license. Users must comply with NCBI API usage guidelines and any applicable publication copyright restrictions.
 
 ## Installation and Setup
 
@@ -99,16 +99,16 @@ For the example above:
 
 ### Q: Where are the downloaded figures saved?
 
-**A:** Figures are saved in the `src/output/` directory, organized by species:
+**A:** At runtime the tool writes extracted images to the `build/output/` directory (when running the compiled JavaScript). The layout is organized by species and PMC ID; the package extraction and write behavior are implemented in [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts). Example:
 
 ```text
-src/output/
+build/output/
+├── cache/
+│   └── id.json
 ├── Homo_sapiens/
-│   ├── figures/
-│   │   ├── PMC123456_figure1.jpg
-│   │   └── PMC123456_figure2.jpg
-│   └── metadata/
-│       └── PMC123456_metadata.json
+│   ├── PMC123456/
+│   │   ├── figure1.jpg
+│   │   └── figure2.png
 ```
 
 ## Troubleshooting

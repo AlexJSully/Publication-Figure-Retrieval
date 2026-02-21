@@ -2,10 +2,13 @@ import { throttledQueue } from "throttled-queue";
 import speciesData from "./data/species.json";
 import { fetchArticleDetails } from "./processor/fetchArticleDetails";
 import { searchArticlesBySpecies } from "./processor/searchArticleBySpecies";
+import type { SpeciesData } from "./types";
 
 // Check if NCBI API key is present in environment variables
+
 /** The API key for the NCBI E-utilities. */
 const ncbiApiKey = process?.env?.NCBI_API_KEY;
+
 /**
  * The number of API calls allowed per second.
  * If an API key is provided, we can make up to 10 calls per second.
@@ -21,11 +24,12 @@ const throttle = throttledQueue({
 });
 
 // Read species from species.json
+
 /** The list of species to search for. */
-const speciesList = Object.keys(speciesData);
+const speciesList = Object.keys(speciesData as SpeciesData);
 
 /** Main function to search for articles for each species. */
-async function main() {
+export async function main() {
 	// Loop through each species and search for articles
 	for (const species of speciesList) {
 		console.log(`Searching articles for the species: ${species}...`);
@@ -40,5 +44,7 @@ async function main() {
 	}
 }
 
-// Start the workflow by calling the main function
-main();
+// Start the workflow by calling the main function only if this is the main module
+if (require.main === module) {
+	main();
+}

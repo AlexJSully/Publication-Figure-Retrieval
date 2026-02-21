@@ -27,7 +27,7 @@ graph TD
 ### Signature
 
 ```typescript
-export async function searchArticlesBySpecies(throttle: any, species: string): Promise<string[]>;
+export async function searchArticlesBySpecies(throttle: ThrottleFunction, species: string): Promise<string[]>;
 ```
 
 ### Parameters
@@ -40,8 +40,8 @@ export async function searchArticlesBySpecies(throttle: any, species: string): P
 ### Return Value
 
 - **Type**: `Promise<string[]>`
-- **Description**: Array of PMC IDs (without "PMC" prefix)
-- **Example**: `["123456", "789012", "345678"]`
+- **Description**: The function returns the ID list provided by the NCBI response at `response.data.esearchresult.idlist`. The implementation returns the value directly from the API response (see [`src/processor/searchArticleBySpecies.ts`](../src/processor/searchArticleBySpecies.ts)).
+- **Example**: `["PMC123456", "PMC789012"]` (exact contents depend on the API response)
 
 ### API Integration
 
@@ -155,11 +155,11 @@ const pmcIds = await searchArticlesBySpecies(throttleWithKey, "Cannabis_sativa")
 ```typescript
 // From the actual implementation
 try {
-    const response = await throttle(async () => await axios.get(url));
-    return response.data.esearchresult.idlist; // Returns array of PMC IDs
+	const response = await throttle(async () => await axios.get(url));
+	return response.data.esearchresult.idlist; // Returns array of PMC IDs
 } catch (error) {
-    console.error("Error fetching articles:", error);
-    return []; // Returns empty array on error
+	console.error("Error fetching articles:", error);
+	return []; // Returns empty array on error
 }
 ```
 

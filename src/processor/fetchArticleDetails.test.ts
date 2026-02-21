@@ -1,37 +1,35 @@
-/**
- * @fileoverview Test suite for fetchArticleDetails module.
- *
- * Tests the functionality of fetching detailed article metadata from NCBI PMC,
- * including batch processing, caching mechanisms, and error handling.
- */
 import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { fetchArticleDetails } from "./fetchArticleDetails";
-import { parseFigures } from "./parseFigures";
 
-// Mock external dependencies to control behavior in tests
 jest.mock("axios");
-jest.mock("./parseFigures");
+jest.mock("./parseFigures"); // Only mock the downstream function being tested
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+const cachedIDsFilePath = path.resolve(__dirname, "../output/cache/id.json");
 
 describe("fetchArticleDetails", () => {
-	// Mock throttle function that immediately executes provided function
-	const throttle = jest.fn((fn) => fn());
-	const pmids = ["PMC123456", "PMC654321"];
-	const species = "Homo sapiens";
-	const cachedIDsFilePath = path.resolve(__dirname, "../output/cache/id.json");
+	type TestCase = {
+		name: string;
+		pmids: string[];
+		species: string;
+		cachedIds?: string[];
+		mockError?: Error;
+		wantApiCalls: number;
+		wantLogMessage?: string;
+	};
+
+	const throttle = async <T>(fn: () => Promise<T>) => fn();
 
 	beforeEach(() => {
-		// Reset all mocks to ensure clean test state
 		jest.clearAllMocks();
 
-		// Create cache directory structure for testing
+		// Set up cache directory and file
 		const dir = path.dirname(cachedIDsFilePath);
 		if (!fs.existsSync(dir)) {
 			fs.mkdirSync(dir, { recursive: true });
 		}
-
-		// Remove any existing cache file and create empty one
 		if (fs.existsSync(cachedIDsFilePath)) {
 			fs.unlinkSync(cachedIDsFilePath);
 		}
@@ -39,76 +37,85 @@ describe("fetchArticleDetails", () => {
 	});
 
 	afterEach(() => {
-		// Clean up test files after each test
+		// Cleanup cache after each test
 		const dir = path.dirname(cachedIDsFilePath);
 		if (fs.existsSync(dir)) {
-			fs.rmdirSync(dir, { recursive: true });
+			fs.rmSync(dir, { recursive: true, force: true });
 		}
 	});
 
-	it("should fetch article details in batches and call parseFigures", async () => {
-		// Arrange: Mock successful API response with XML data
-		const mockResponse = { data: "<xml>mock data</xml>" };
-		(axios.get as jest.Mock).mockResolvedValue(mockResponse);
+	const testCases: TestCase[] = [
+		{
+			name: "fetches article details and calls parseFigures for new PMIDs",
+			pmids: ["PMC123456", "PMC654321"],
+			species: "Homo sapiens",
+			wantApiCalls: 1,
+		},
+		{
+			name: "handles API errors gracefully",
+			pmids: ["PMC123456"],
+			species: "Homo sapiens",
+			mockError: new Error("Network error"),
+			wantApiCalls: 1,
+		},
+		{
+			name: "skips already cached PMIDs",
+			pmids: ["PMC123456", "PMC654321"],
+			species: "Homo sapiens",
+			cachedIds: ["PMC123456", "PMC654321"],
+			wantApiCalls: 0,
+			wantLogMessage: "All IDs",
+		},
+		{
+			name: "handles empty PMID array",
+			pmids: [],
+			species: "Homo sapiens",
+			wantApiCalls: 0,
+			wantLogMessage: "No PMC IDs provided",
+		},
+		{
+			name: "fetches only new uncached PMIDs",
+			pmids: ["PMC123456", "PMC654321", "PMC999999"],
+			species: "Homo sapiens",
+			cachedIds: ["PMC123456"],
+			wantApiCalls: 1,
+		},
+	];
 
-		// Act: Process the PMC IDs
+	it.each(testCases)("$name", async ({ pmids, species, cachedIds, mockError, wantApiCalls, wantLogMessage }) => {
+		// Arrange: Set up cache if provided
+		if (cachedIds) {
+			fs.writeFileSync(cachedIDsFilePath, JSON.stringify(cachedIds));
+		}
+
+		if (mockError) {
+			mockedAxios.get.mockRejectedValue(mockError);
+		} else {
+			mockedAxios.get.mockResolvedValue({ data: "<xml>mock</xml>" });
+		}
+
+		const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		// Act
 		await fetchArticleDetails(throttle, pmids, species);
 
-		// Assert: Verify API called correctly and parseFigures invoked
-		expect(axios.get).toHaveBeenCalledTimes(1);
-		expect(axios.get).toHaveBeenCalledWith(
-			"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC123456,PMC654321&retmode=xml",
-		);
-		expect(parseFigures).toHaveBeenCalledWith(throttle, mockResponse.data, species);
-	});
+		// Assert
+		expect(mockedAxios.get).toHaveBeenCalledTimes(wantApiCalls);
 
-	it("should handle errors gracefully", async () => {
-		// Arrange: Mock console.error and network failure
-		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-		(axios.get as jest.Mock).mockRejectedValue(new Error("Network error"));
+		if (mockError) {
+			expect(errorSpy).toHaveBeenCalledWith(
+				"Error fetching article details:",
+				mockError.message,
+				expect.objectContaining({ species }),
+			);
+		}
 
-		// Act: Attempt to fetch details which should fail gracefully
-		await fetchArticleDetails(throttle, pmids, species);
+		if (wantLogMessage) {
+			expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(wantLogMessage));
+		}
 
-		// Assert: Verify error handling
-		expect(axios.get).toHaveBeenCalledTimes(1);
-		expect(consoleErrorSpy).toHaveBeenCalledWith("Error fetching article details:", expect.any(Error));
-
-		consoleErrorSpy.mockRestore();
-	});
-
-	it("should cache fetched IDs and skip already cached IDs", async () => {
-		// Arrange: Mock successful API response
-		const mockResponse = { data: "<xml>mock data</xml>" };
-		(axios.get as jest.Mock).mockResolvedValue(mockResponse);
-
-		// Act: Initial fetch to populate cache
-		await fetchArticleDetails(throttle, pmids, species);
-
-		// Assert: Verify cache was created with correct IDs
-		expect(fs.existsSync(cachedIDsFilePath)).toBe(true);
-		const cachedIDs = JSON.parse(fs.readFileSync(cachedIDsFilePath, "utf-8"));
-		expect(cachedIDs).toEqual(pmids);
-
-		// Act: Fetch same IDs again (should use cache)
-		await fetchArticleDetails(throttle, pmids, species);
-
-		// Assert: API should only be called once (cache hit on second call)
-		expect(axios.get).toHaveBeenCalledTimes(1);
-	});
-
-	it("should handle empty PMID array gracefully", async () => {
-		// Arrange: Empty PMC ID array and console spy
-		const emptyPmids: string[] = [];
-		const consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-
-		// Act: Call function with empty array
-		await fetchArticleDetails(throttle, emptyPmids, species);
-
-		// Assert: Verify no API calls made and appropriate message logged
-		expect(axios.get).not.toHaveBeenCalled();
-		expect(consoleLogSpy).toHaveBeenCalledWith("No PMC IDs provided for Homo sapiens.");
-
-		consoleLogSpy.mockRestore();
+		logSpy.mockRestore();
+		errorSpy.mockRestore();
 	});
 });

@@ -143,56 +143,45 @@ graph TD
 
 ### 4. Parse Module (`src/processor/parseFigures.ts`)
 
-Processes XML article data to extract figure information:
+Processes XML article data to extract PMC IDs and orchestrate package downloads:
 
 ```mermaid
 graph LR
-    A[XML Article Data] --> B[Parse XML Structure]
-    B --> C[Extract Article Metadata]
-    C --> D[Find Figure Elements]
-    D --> E[Extract Figure URLs]
-    E --> F[Process Each Figure]
-    F --> G[Download Figure]
-    G --> H[Save to File System]
+        A[XML Article Data] --> B[Parse XML Structure]
+        B --> C[Extract Article Metadata]
+        C --> D[Locate PMC ID]
+        D --> E[Request Article Package]
+        E --> F[Extract Images from Package]
+        F --> G[Save Images to File System]
 ```
 
-**XML Structure Navigation:**
+**XML Structure Navigation (PMC ID extraction):**
+
+The parser locates the PMC identifier in the article front matter (see implementation: [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts)).
 
 ```xml
 <pmc-articleset>
-  <article>
-    <front>
-      <article-meta>
-        <article-id pub-id-type="pmc">PMC123456</article-id>
-      </article-meta>
-    </front>
-    <body>
-      <fig>
-        <graphic xlink:href="figure1.jpg"/>
-      </fig>
-    </body>
-  </article>
+    <article>
+        <front>
+            <article-meta>
+                <article-id pub-id-type="pmcid">PMC123456</article-id>
+            </article-meta>
+        </front>
+    </article>
 </pmc-articleset>
 ```
 
-### 5. Download Module (`src/processor/downloadImage.ts`)
+### 5. Download Module (`src/processor/downloadArticlePackage.ts`)
 
-Handles actual file downloads with proper error handling:
+Downloads a complete PMC article package (.tar.gz) and extracts image files. The implementation fetches a package URL from the OA Web Service API, downloads the archive, extracts media, and selects the highest-priority image format per basename before copying results to the output directory (see implementation: [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts)).
 
-```mermaid
-stateDiagram-v2
-    [*] --> Validate_URL
-    Validate_URL --> Create_Directory
-    Create_Directory --> Download_File
-    Download_File --> Success : HTTP 200
-    Download_File --> Retry : Network Error
-    Download_File --> Skip : HTTP 404
-    Retry --> Download_File : Max 3 attempts
-    Retry --> Failed : Exceeded retries
-    Success --> [*]
-    Skip --> [*]
-    Failed --> [*]
-```
+Key implementation behaviors (implementation proof):
+
+- Fetches OA package metadata via the OA API and converts FTP links to HTTPS (see [`src/processor/fetchPackageUrl.ts`](../src/processor/fetchPackageUrl.ts)).
+- Downloads the package archive and extracts it to a temporary directory (see [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts)).
+- Groups files by basename and keeps the highest-priority extension using the `IMAGE_EXTENSIONS` priority map (see [`src/constants.ts`](../src/constants.ts)).
+
+Console-level messages written by the implementation include `Fetching package URL for <PMCID>`, `Package downloaded. Extracting images...`, `Extracted image: <filename>`, and `Successfully extracted <N> images from package.` (see [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts)).
 
 ## Data Flow Architecture
 
@@ -211,13 +200,13 @@ graph TD
 
     subgraph "Content Processing"
         D --> E[XML Parsing]
-        E --> F[Figure URL Extraction]
-        F --> G[URL Validation]
+        E --> F[PMC ID Extraction]
+        F --> G[Request Article Package]
+        G --> H[Extract Images from Package]
     end
 
     subgraph "File Operations"
-        G --> H[Directory Creation]
-        H --> I[Figure Download]
+        H --> I[Directory Creation]
         I --> J[File System Storage]
     end
 

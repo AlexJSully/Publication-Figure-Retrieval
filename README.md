@@ -121,17 +121,17 @@ For comprehensive documentation, see the [`docs/`](docs/) folder:
 
 ## Maintenance Mode
 
-This project is currently in maintenance mode. This means that:
+This project is currently in **maintenance mode**. This means that:
 
-- Only critical bug fixes and security updates will be addressed.
-- New feature requests are unlikely to be implemented.
+- ✅ **Critical bug fixes** will be addressed
+- ✅ **Security updates** will be implemented promptly
+- ✅ **Minor improvements** to existing functionality may be accepted
+- ❌ **New features** are unlikely to be implemented
+- ❌ **Major refactoring** or architectural changes will not be pursued
 
-## Sponsorship
+**Response Time:** While we strive to address issues promptly, response times may vary. Critical security issues will be prioritized.
 
-If you want to support my work, you can do so through the following methods:
-
-- [BTC](3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog) - 3Lp4pwF5nXqwFA62BYx4DSvDswyYpskBog
-- [ETH](0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2) - 0xc6EB17BD7cbe5976Bfc4f845669cD66Ff340a1A2
+**Contributing:** Pull requests for bug fixes and security patches are still welcome. Please review the [Contributing Guidelines](CONTRIBUTING.md) before submitting.
 
 ## Authors
 

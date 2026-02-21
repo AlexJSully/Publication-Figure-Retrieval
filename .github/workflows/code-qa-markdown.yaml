@@ -1,20 +1,22 @@
-name: Markdown Lint
+name: Code Quality Assurance - Markdown
 
 on:
     push:
         branches: [master]
         paths:
             - "**/*.md"
+            - ".github/workflows/markdown-lint.yaml"
             - ".markdownlint.json"
             - ".markdownlintignore"
-            - ".github/workflows/markdown-lint.yaml"
+            - "package*.json"
     pull_request:
         branches: [master]
         paths:
             - "**/*.md"
+            - ".github/workflows/markdown-lint.yaml"
             - ".markdownlint.json"
             - ".markdownlintignore"
-            - ".github/workflows/markdown-lint.yaml"
+            - "package*.json"
 
 permissions:
     contents: read
@@ -24,13 +26,13 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version: ${{ matrix.node-version }}
             - name: Cache Node.js modules
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
