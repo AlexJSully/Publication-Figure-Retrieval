@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 To see tags and releases, please go to [Tags](https://github.com/AlexJSully/Publication-Figure-Retrieval/tags) on [GitHub](https://github.com/AlexJSully/Publication-Figure-Retrieval).
 
+## [3.0.2] - 2026-02-21
+
+Bug fix:
+
+- Fixed unable to download images
+- Fixed handling of empty PMID array
+
+Documentation:
+
+- Created comprehensive docs/ directory to explain codebase architecture and usage
+
 ## [3.0.1] - 2024-08-26
 
 Feature:
