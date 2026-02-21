@@ -52,7 +52,7 @@ export async function parseFigures(
 		// Process each article to download the complete package including all figures
 		for (const article of articles) {
 			const pmcIdObj = article.front[0]["article-meta"][0]["article-id"].find(
-				(id) => id.$["pub-id-type"] === "pmcid",
+				(id) => id.$["pub-id-type"] === "pmc" || id.$["pub-id-type"] === "pmcid",
 			);
 
 			if (!pmcIdObj) {

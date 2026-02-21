@@ -69,9 +69,19 @@ export async function fetchPackageUrl(pmcId: string): Promise<PackageInfo> {
 			for (const link of links) {
 				if (link.$?.format === "tgz") {
 					// Convert FTP URL to HTTPS URL for better compatibility
-					packageInfo.tgzUrl = link.$?.href?.replace("ftp://", "https://");
+					const originalUrl = link.$?.href;
+					const httpsUrl = originalUrl?.replace("ftp://", "https://");
+					if (httpsUrl && httpsUrl !== originalUrl) {
+						console.log(`Converted FTP to HTTPS: ${originalUrl} -> ${httpsUrl}`);
+					}
+					packageInfo.tgzUrl = httpsUrl;
 				} else if (link.$?.format === "pdf") {
-					packageInfo.pdfUrl = link.$?.href?.replace("ftp://", "https://");
+					const originalUrl = link.$?.href;
+					const httpsUrl = originalUrl?.replace("ftp://", "https://");
+					if (httpsUrl && httpsUrl !== originalUrl) {
+						console.log(`Converted FTP to HTTPS: ${originalUrl} -> ${httpsUrl}`);
+					}
+					packageInfo.pdfUrl = httpsUrl;
 				}
 			}
 		}
@@ -103,7 +113,8 @@ export async function fetchPackageUrl(pmcId: string): Promise<PackageInfo> {
 export async function fetchPackageUrlsBatch(pmcIds: string[], delayMs: number = 334): Promise<PackageInfo[]> {
 	const results: PackageInfo[] = [];
 
-	for (const pmcId of pmcIds) {
+	for (let i = 0; i < pmcIds.length; i++) {
+		const pmcId = pmcIds[i];
 		try {
 			const packageInfo = await fetchPackageUrl(pmcId);
 			results.push(packageInfo);
@@ -113,7 +124,7 @@ export async function fetchPackageUrlsBatch(pmcIds: string[], delayMs: number = 
 		}
 
 		// Add delay between requests to respect rate limits
-		if (pmcIds.indexOf(pmcId) < pmcIds.length - 1) {
+		if (i < pmcIds.length - 1) {
 			await new Promise((resolve) => setTimeout(resolve, delayMs));
 		}
 	}

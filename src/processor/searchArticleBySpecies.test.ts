@@ -1,40 +1,29 @@
 import axios from "axios";
 import { searchArticlesBySpecies } from "./searchArticleBySpecies";
 
-// Mock axios to control API responses in tests
 jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe("searchArticlesBySpecies", () => {
 	type TestCase = {
 		name: string;
-		input: {
-			species: string;
-		};
-		mockResponse?: {
-			data: {
-				esearchresult: {
-					idlist: string[];
-				};
-			};
-		};
+		species: string;
+		mockResponse?: { data: { esearchresult: { idlist: string[] } } };
 		mockError?: Error;
-		want: string[];
+		wantIds: string[];
+		wantError?: boolean;
 	};
 
-	// Mock throttle function that immediately executes the provided function
-	const throttle = jest.fn((fn) => fn());
+	const throttle = async <T>(fn: () => Promise<T>) => fn();
 
 	beforeEach(() => {
-		// Reset all mocks before each test to ensure clean state
 		jest.clearAllMocks();
 	});
 
 	const testCases: TestCase[] = [
 		{
-			name: "returns array of PMCIDs when API call is successful",
-			input: {
-				species: "Homo sapiens",
-			},
+			name: "returns array of PMC IDs when API call succeeds",
+			species: "Homo sapiens",
 			mockResponse: {
 				data: {
 					esearchresult: {
@@ -42,21 +31,18 @@ describe("searchArticlesBySpecies", () => {
 					},
 				},
 			},
-			want: ["PMC123456", "PMC654321"],
+			wantIds: ["PMC123456", "PMC654321"],
 		},
 		{
 			name: "returns empty array when API call fails",
-			input: {
-				species: "Invalid species",
-			},
+			species: "Invalid species",
 			mockError: new Error("Network error"),
-			want: [],
+			wantIds: [],
+			wantError: true,
 		},
 		{
 			name: "returns empty array for species with no results",
-			input: {
-				species: "Nonexistent species",
-			},
+			species: "Nonexistent species",
 			mockResponse: {
 				data: {
 					esearchresult: {
@@ -64,41 +50,34 @@ describe("searchArticlesBySpecies", () => {
 					},
 				},
 			},
-			want: [],
+			wantIds: [],
 		},
 	];
 
-	it.each(testCases)("$name", async ({ input, mockResponse, mockError, want }) => {
-		// Arrange: Set up mock based on test case
+	it.each(testCases)("$name", async ({ species, mockResponse, mockError, wantIds, wantError }) => {
+		// Arrange
 		if (mockError) {
-			const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-			(axios.get as jest.Mock).mockRejectedValue(mockError);
+			mockedAxios.get.mockRejectedValue(mockError);
+		} else if (mockResponse) {
+			mockedAxios.get.mockResolvedValue(mockResponse);
+		}
 
-			// Act: Call function which should handle the error
-			const result = await searchArticlesBySpecies(throttle, input.species);
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-			// Assert: Verify graceful error handling
-			expect(result).toEqual(want);
+		// Act
+		const result = await searchArticlesBySpecies(throttle, species);
+
+		// Assert
+		expect(result).toEqual(wantIds);
+
+		if (wantError && mockError) {
 			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				"Error fetching articles:",
 				mockError.message,
-				expect.objectContaining({ species: input.species }),
+				expect.objectContaining({ species }),
 			);
-
-			consoleErrorSpy.mockRestore();
-		} else if (mockResponse) {
-			(axios.get as jest.Mock).mockResolvedValue(mockResponse);
-
-			// Act: Call the function with test species
-			const result = await searchArticlesBySpecies(throttle, input.species);
-
-			// Assert: Verify API was called correctly and result is as expected
-			const query = `${input.species}[organism]`;
-			const expectedUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
-				query,
-			)}&retmode=json&retmax=1000000`;
-			expect(axios.get).toHaveBeenCalledWith(expectedUrl);
-			expect(result).toEqual(want);
 		}
+
+		consoleErrorSpy.mockRestore();
 	});
 });

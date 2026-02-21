@@ -67,17 +67,48 @@ export async function downloadArticlePackage(
 	response.data.pipe(writer);
 
 	await new Promise<void>((resolve, reject) => {
-		writer.on("finish", resolve);
-		writer.on("error", reject);
+		const onFinish = () => {
+			response.data.removeListener("error", onError);
+			writer.removeListener("error", onError);
+			writer.removeListener("finish", onFinish);
+			resolve();
+		};
+
+		const onError = (err: Error) => {
+			response.data.removeListener("error", onError);
+			writer.removeListener("error", onError);
+			writer.removeListener("finish", onFinish);
+			reject(err);
+		};
+
+		writer.on("finish", onFinish);
+		writer.on("error", onError);
+		response.data.on("error", onError);
 	});
 
 	console.log(`Package downloaded. Extracting images...`);
 
-	// Extract tar.gz to temporary directory
-	await execAsync(`tar -xzf "${tempTarPath}" -C "${tempDir}"`);
+	let extractedPackageDir: string;
+	const expectedDir = path.join(tempDir, pmcId);
+
+	try {
+		// Extract tar.gz to temporary directory
+		await execAsync(`tar -xzf "${tempTarPath}" -C "${tempDir}"`);
+
+		// Check if the expected subdirectory exists, otherwise use tempDir directly
+		if (fs.existsSync(expectedDir)) {
+			extractedPackageDir = expectedDir;
+		} else {
+			console.log(`Expected directory ${expectedDir} not found. Looking for images in temp directory...`);
+			extractedPackageDir = tempDir;
+		}
+	} catch (error) {
+		// Clean up temporary files on extraction error
+		fs.rmSync(tempDir, { recursive: true, force: true });
+		throw error;
+	}
 
 	// Find extracted image files and deduplicate based on extension priority
-	const extractedPackageDir = path.join(tempDir, pmcId);
 	const extractedImages: string[] = [];
 
 	if (fs.existsSync(extractedPackageDir)) {
@@ -124,8 +155,13 @@ export async function downloadArticlePackage(
 		}
 	}
 
-	// Clean up temporary files
-	fs.rmSync(tempDir, { recursive: true, force: true });
+	// Clean up temporary files in finally block to ensure cleanup even on errors
+	try {
+		// Clean up temporary files
+		fs.rmSync(tempDir, { recursive: true, force: true });
+	} catch (err) {
+		console.error(`Warning: Failed to clean up temporary files at ${tempDir}:`, err);
+	}
 
 	console.log(`Successfully extracted ${extractedImages.length} images from package.`);
 	return extractedImages;
