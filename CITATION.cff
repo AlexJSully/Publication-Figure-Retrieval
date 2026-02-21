@@ -29,6 +29,6 @@ keywords:
     - publication data
     - science
 license: GPL-2.0
-commit: 740b403cf6575e00471013b1664339caa8ad61c3
-version: 3.0.1
-date-released: "2024-08-26"
+commit: b65f7b654623375949ae61709fa5e42d47e72869
+version: 3.0.2
+date-released: "2026-02-21"
