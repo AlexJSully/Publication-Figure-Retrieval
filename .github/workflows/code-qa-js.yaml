@@ -1,10 +1,28 @@
-name: Code Quality Assurance
+name: Code Quality Assurance - JavaScript/TypeScript
 
 on:
     push:
         branches: [master]
+        paths:
+            - "**/*.js"
+            - "**/*.json"
+            - "**/*.ts"
+            - ".github/workflows/code-qa-js.yaml"
+            - "eslint.config.js"
+            - "jest.config.js"
+            - "package*.json"
+            - "tsconfig*.json"
     pull_request:
         branches: [master]
+        paths:
+            - "**/*.js"
+            - "**/*.json"
+            - "**/*.ts"
+            - ".github/workflows/code-qa-js.yaml"
+            - "eslint.config.js"
+            - "jest.config.js"
+            - "package*.json"
+            - "tsconfig*.json"
 
 permissions:
     contents: read
@@ -19,13 +37,13 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version: ${{ matrix.node-version }}
             - name: Cache Node.js modules
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}

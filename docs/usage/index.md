@@ -54,10 +54,10 @@ npm run start
 
 The tool will:
 
-1. **Load species configuration** from `src/data/species.json`
+1. **Load species configuration** from [`src/data/species.json`](../src/data/species.json)
 2. **Initialize rate limiting** (3 requests/second without API key)
 3. **Process each species** sequentially
-4. **Download figures** to `build/output/[species]/[pmcid]/`
+4. **Download article packages and extract images** into `build/output/[species]/[pmcid]/` (see [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts))
 5. **Cache progress** for resume capability
 
 ### Example Output
@@ -67,10 +67,13 @@ Searching articles for the species: Arabidopsis_thaliana...
 Found 1,247 articles for Arabidopsis_thaliana
 Fetching Arabidopsis thaliana article details for batch 1-50...
 Processing article PMC ID: PMC123456
-Found 3 figures in the article.
-Downloaded image: figure1.jpg
-Downloaded image: figure2.png
-Downloaded image: supplementary1.tiff
+Fetching package URL for PMC123456...
+Downloading package from https://.../PMC123456.tar.gz
+Package downloaded. Extracting images...
+Extracted image: figure1.jpg (priority: jpg)
+Extracted image: figure2.png (priority: png)
+Successfully extracted 2 images from package.
+Successfully processed article package for PMC123456
 ```
 
 ## Configuration Options

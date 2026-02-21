@@ -1,93 +1,145 @@
-/**
- * @fileoverview Test suite for extractFigureUrls module.
- *
- * Tests the functionality of extracting downloadable figure URLs from
- * parsed PMC article XML structures and constructing valid NCBI download URLs.
- */
+import type { PMCArticle } from "../types";
 import { extractFigureUrls } from "./extractFigureUrls";
 
 describe("extractFigureUrls", () => {
-	const pmcId = "123456";
+	type TestCase = {
+		name: string;
+		input: {
+			article: PMCArticle;
+			pmcId: string;
+		};
+		want: string[];
+	};
 
-	it("should return an array of absolute URLs for figures with extensions", () => {
-		// Arrange: Article structure with figures containing explicit file extensions
-		const article = {
-			body: [
-				{
-					fig: [
+	const testCases: TestCase[] = [
+		{
+			name: "returns absolute URLs for figures with extensions",
+			input: {
+				article: {
+					front: [],
+					body: [
 						{
-							graphic: [{ $: { "xlink:href": "image1.jpg" } }, { $: { "xlink:href": "image2.png" } }],
+							fig: [
+								{
+									graphic: [
+										{ $: { "xlink:href": "image1.jpg" } },
+										{ $: { "xlink:href": "image2.png" } },
+									],
+								},
+							],
 						},
 					],
 				},
+				pmcId: "123456",
+			},
+			want: [
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456/bin/image1.jpg",
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456/bin/image2.png",
 			],
-		};
-
-		// Expected URLs with original extensions preserved
-		const expectedUrls = [
-			`https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/bin/image1.jpg`,
-			`https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/bin/image2.png`,
-		];
-
-		// Act: Extract figure URLs from article structure
-		const result = extractFigureUrls(article, pmcId);
-
-		// Assert: Verify URLs match expected format and preserve extensions
-		expect(result).toEqual(expectedUrls);
-	});
-
-	it("should add .jpg extension if not present", () => {
-		// Arrange: Article with graphics missing file extensions
-		const article = {
-			body: [
-				{
-					fig: [
+		},
+		{
+			name: "adds .jpg extension if not present",
+			input: {
+				article: {
+					front: [],
+					body: [
 						{
-							graphic: [{ $: { "xlink:href": "image1" } }, { $: { "xlink:href": "image2" } }],
+							fig: [
+								{
+									graphic: [{ $: { "xlink:href": "image1" } }, { $: { "xlink:href": "image2" } }],
+								},
+							],
 						},
 					],
 				},
+				pmcId: "123456",
+			},
+			want: [
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456/bin/image1.jpg",
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456/bin/image2.jpg",
 			],
-		};
-
-		// Expected URLs with .jpg extension added
-		const expectedUrls = [
-			`https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/bin/image1.jpg`,
-			`https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/bin/image2.jpg`,
-		];
-
-		// Act: Process figures without extensions
-		const result = extractFigureUrls(article, pmcId);
-
-		// Assert: Verify default extension was added
-		expect(result).toEqual(expectedUrls);
-	});
-
-	it("should return an empty array if no figures are found", () => {
-		// Arrange: Article with empty figure array
-		const article = {
-			body: [
-				{
-					fig: [], // Empty figures array
+		},
+		{
+			name: "returns empty array if no figures are found",
+			input: {
+				article: {
+					front: [],
+					body: [
+						{
+							fig: [],
+						},
+					],
 				},
+				pmcId: "123456",
+			},
+			want: [],
+		},
+		{
+			name: "returns empty array if no body section is present",
+			input: {
+				article: {
+					front: [],
+				},
+				pmcId: "123456",
+			},
+			want: [],
+		},
+		{
+			name: "handles multiple image formats correctly",
+			input: {
+				article: {
+					front: [],
+					body: [
+						{
+							fig: [
+								{
+									graphic: [
+										{ $: { "xlink:href": "fig1.gif" } },
+										{ $: { "xlink:href": "fig2.tiff" } },
+										{ $: { "xlink:href": "fig3.svg" } },
+									],
+								},
+							],
+						},
+					],
+				},
+				pmcId: "789012",
+			},
+			want: [
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC789012/bin/fig1.gif",
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC789012/bin/fig2.tiff",
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC789012/bin/fig3.svg",
 			],
-		};
+		},
+		{
+			name: "handles PMC IDs that already include PMC prefix",
+			input: {
+				article: {
+					front: [],
+					body: [
+						{
+							fig: [
+								{
+									graphic: [
+										{ $: { "xlink:href": "PBI-24-486-g001.jpg" } },
+										{ $: { "xlink:href": "figure-2" } },
+									],
+								},
+							],
+						},
+					],
+				},
+				pmcId: "PMC12906822",
+			},
+			want: [
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12906822/bin/PBI-24-486-g001.jpg",
+				"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12906822/bin/figure-2.jpg",
+			],
+		},
+	];
 
-		// Act: Process article with no figures
-		const result = extractFigureUrls(article, pmcId);
-
-		// Assert: Should return empty array for no figures
-		expect(result).toEqual([]);
-	});
-
-	it("should return an empty array if no body section is present", () => {
-		// Arrange: Article missing body section completely
-		const article = {}; // No body property
-
-		// Act: Process article without body structure
-		const result = extractFigureUrls(article, pmcId);
-
-		// Assert: Should handle missing body gracefully
-		expect(result).toEqual([]);
+	it.each(testCases)("$name", ({ input, want }) => {
+		const result = extractFigureUrls(input.article, input.pmcId);
+		expect(result).toEqual(want);
 	});
 });

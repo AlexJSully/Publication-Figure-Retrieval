@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { ThrottleFunction } from "../types";
 
 /**
  * Fetches a list of article PMCIDs based on a species query.
@@ -16,7 +17,7 @@ import axios from "axios";
  */
 export async function searchArticlesBySpecies(
 	/** The throttling function to control the rate of API requests. */
-	throttle: any,
+	throttle: ThrottleFunction,
 	/** The species name to be used in the query. */
 	species: string,
 ): Promise<string[]> {
@@ -25,6 +26,7 @@ export async function searchArticlesBySpecies(
 	let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
 		query,
 	)}&retmode=json&retmax=1000000`;
+
 	// Check if there is a NCBI API key available and if so, add it to the URL
 	if (process?.env?.NCBI_API_KEY) {
 		url += `&api_key=${process.env.NCBI_API_KEY}`;
@@ -33,9 +35,12 @@ export async function searchArticlesBySpecies(
 	try {
 		// Make HTTP request to NCBI E-utilities API to search for articles
 		const response = await throttle(async () => await axios.get(url));
+
 		return response.data.esearchresult.idlist; // Returns an array of PubMed Central IDs (PMCIDs)
-	} catch (error) {
-		console.error("Error fetching articles:", error);
+	} catch (error: unknown) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error("Error fetching articles:", errorMessage, { species });
+
 		return [];
 	}
 }

@@ -1,9 +1,3 @@
-/**
- * @fileoverview Test suite for searchArticlesBySpecies module.
- *
- * Tests the functionality of searching NCBI PMC database for articles
- * related to specific species using the E-utilities API.
- */
 import axios from "axios";
 import { searchArticlesBySpecies } from "./searchArticleBySpecies";
 
@@ -11,46 +5,100 @@ import { searchArticlesBySpecies } from "./searchArticleBySpecies";
 jest.mock("axios");
 
 describe("searchArticlesBySpecies", () => {
+	type TestCase = {
+		name: string;
+		input: {
+			species: string;
+		};
+		mockResponse?: {
+			data: {
+				esearchresult: {
+					idlist: string[];
+				};
+			};
+		};
+		mockError?: Error;
+		want: string[];
+	};
+
 	// Mock throttle function that immediately executes the provided function
 	const throttle = jest.fn((fn) => fn());
-	const species = "Homo sapiens";
-	const query = `${species}[organism]`;
-	const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
-		query,
-	)}&retmode=json&retmax=1000000`;
 
 	beforeEach(() => {
 		// Reset all mocks before each test to ensure clean state
 		jest.clearAllMocks();
 	});
 
-	it("should return an array of PMCIDs when the API call is successful", async () => {
-		// Arrange: Mock successful API response with sample PMC IDs
-		const mockResponse = { data: { esearchresult: { idlist: ["PMC123456", "PMC654321"] } } };
-		(axios.get as jest.Mock).mockResolvedValue(mockResponse);
+	const testCases: TestCase[] = [
+		{
+			name: "returns array of PMCIDs when API call is successful",
+			input: {
+				species: "Homo sapiens",
+			},
+			mockResponse: {
+				data: {
+					esearchresult: {
+						idlist: ["PMC123456", "PMC654321"],
+					},
+				},
+			},
+			want: ["PMC123456", "PMC654321"],
+		},
+		{
+			name: "returns empty array when API call fails",
+			input: {
+				species: "Invalid species",
+			},
+			mockError: new Error("Network error"),
+			want: [],
+		},
+		{
+			name: "returns empty array for species with no results",
+			input: {
+				species: "Nonexistent species",
+			},
+			mockResponse: {
+				data: {
+					esearchresult: {
+						idlist: [],
+					},
+				},
+			},
+			want: [],
+		},
+	];
 
-		// Act: Call the function with test species
-		const result = await searchArticlesBySpecies(throttle, species);
+	it.each(testCases)("$name", async ({ input, mockResponse, mockError, want }) => {
+		// Arrange: Set up mock based on test case
+		if (mockError) {
+			const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+			(axios.get as jest.Mock).mockRejectedValue(mockError);
 
-		// Assert: Verify API was called correctly and result is as expected
-		expect(axios.get).toHaveBeenCalledWith(url);
-		expect(result).toEqual(["PMC123456", "PMC654321"]);
-	});
+			// Act: Call function which should handle the error
+			const result = await searchArticlesBySpecies(throttle, input.species);
 
-	it("should return an empty array when the API call fails", async () => {
-		// Arrange: Mock console.error to verify error logging
-		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-		(axios.get as jest.Mock).mockRejectedValue(new Error("Network error"));
+			// Assert: Verify graceful error handling
+			expect(result).toEqual(want);
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
+				"Error fetching articles:",
+				mockError.message,
+				expect.objectContaining({ species: input.species }),
+			);
 
-		// Act: Call function which should handle the error
-		const result = await searchArticlesBySpecies(throttle, species);
+			consoleErrorSpy.mockRestore();
+		} else if (mockResponse) {
+			(axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
-		// Assert: Verify graceful error handling
-		expect(axios.get).toHaveBeenCalledWith(url);
-		expect(result).toEqual([]); // Should return empty array, not throw
-		expect(consoleErrorSpy).toHaveBeenCalledWith("Error fetching articles:", expect.any(Error));
+			// Act: Call the function with test species
+			const result = await searchArticlesBySpecies(throttle, input.species);
 
-		// Cleanup: Restore original console.error
-		consoleErrorSpy.mockRestore();
+			// Assert: Verify API was called correctly and result is as expected
+			const query = `${input.species}[organism]`;
+			const expectedUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
+				query,
+			)}&retmode=json&retmax=1000000`;
+			expect(axios.get).toHaveBeenCalledWith(expectedUrl);
+			expect(result).toEqual(want);
+		}
 	});
 });

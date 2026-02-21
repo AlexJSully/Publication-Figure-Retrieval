@@ -1,3 +1,6 @@
+import { IMAGE_EXTENSION_PATTERN } from "../constants";
+import type { PMCArticle } from "../types";
+
 /**
  * Extracts figure URLs from an article object.
  *
@@ -27,7 +30,7 @@
  */
 export function extractFigureUrls(
 	/** The article object containing the body section with figures. */
-	article: any,
+	article: PMCArticle,
 	/** The PubMed Central ID of the article. */
 	pmcId: string,
 ): string[] {
@@ -39,24 +42,26 @@ export function extractFigureUrls(
 	const body = article.body ? article.body[0] : null;
 
 	if (body?.["fig"]) {
-		body["fig"].forEach((fig: any) => {
+		body["fig"].forEach((fig) => {
 			/** The graphic section of the figure. */
 			const graphic = fig["graphic"];
 
 			if (graphic) {
-				graphic.forEach((g: any) => {
+				graphic.forEach((g) => {
 					/** The URL of the figure graphic. */
 					let figureUrl = g.$["xlink:href"];
 
 					if (figureUrl) {
 						// Add .jpg extension if not present
-						if (!figureUrl.match(/\.(jpg|jpeg|png|gif|tiff|svg)$/)) {
+						if (!IMAGE_EXTENSION_PATTERN.test(figureUrl)) {
 							figureUrl += ".jpg";
 						}
 
 						// Construct the correct absolute URL
+						// PMC ID may already include 'PMC' prefix from XML, avoid duplication
+						const pmcIdWithPrefix = pmcId.startsWith("PMC") ? pmcId : `PMC${pmcId}`;
 						/** The absolute URL of the figure graphic. */
-						const absoluteUrl = `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/bin/${figureUrl}`;
+						const absoluteUrl = `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmcIdWithPrefix}/bin/${figureUrl}`;
 
 						figureUrls.push(absoluteUrl);
 					}
