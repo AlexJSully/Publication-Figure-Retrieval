@@ -40,7 +40,7 @@ export async function searchArticlesBySpecies(throttle: ThrottleFunction, specie
 ### Return Value
 
 - **Type**: `Promise<string[]>`
-- **Description**: The function returns the ID list provided by the NCBI response at `response.data.esearchresult.idlist`. The implementation returns the value directly from the API response (see [`src/processor/searchArticleBySpecies.ts`](../src/processor/searchArticleBySpecies.ts)).
+- **Description**: The function returns the ID list provided by the NCBI response at `response.data.esearchresult.idlist`. The implementation returns the value directly from the API response (see [`src/processor/searchArticleBySpecies.ts`](../../../src/processor/searchArticleBySpecies.ts)).
 - **Example**: `["PMC123456", "PMC789012"]` (exact contents depend on the API response)
 
 ### API Integration

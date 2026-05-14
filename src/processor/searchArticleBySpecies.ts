@@ -4,15 +4,17 @@ import type { ThrottleFunction } from "../types";
 /**
  * Fetches a list of article PMCIDs based on a species query.
  *
- * This function constructs a query for the specified species and applies an open-access filter.
- * It then makes an HTTP request to the NCBI E-utilities API to search for articles.
- * The function returns an array of PubMed Central IDs (PMCIDs) for the articles found.
+ * This function constructs an organism query for the specified species and calls
+ * the NCBI E-utilities ESearch API (`db=pmc`, `retmode=json`, `retmax=1000000`).
+ * When `NCBI_API_KEY` is set, it appends the key to the request.
+ *
+ * On request failures it logs the error and returns an empty array.
  *
  * @returns {Promise<string[]>} A promise that resolves to an array of PMCIDs.
  *
  * @example
- * const throttle = throttledQueue(2, 1000);
- * const species = "Homo sapiens";
+ * const throttle = throttledQueue({ maxPerInterval: 3, interval: 1000 });
+ * const species = "Homo_sapiens";
  * const pmids = await searchArticlesBySpecies(throttle, species);
  */
 export async function searchArticlesBySpecies(
@@ -21,22 +23,22 @@ export async function searchArticlesBySpecies(
 	/** The species name to be used in the query. */
 	species: string,
 ): Promise<string[]> {
-	// Construct query for species and open-access filter
+	// Construct organism query for the species.
 	const query = `${species}[organism]`;
 	let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
 		query,
 	)}&retmode=json&retmax=1000000`;
 
-	// Check if there is a NCBI API key available and if so, add it to the URL
+	// Attach API key when provided.
 	if (process?.env?.NCBI_API_KEY) {
 		url += `&api_key=${process.env.NCBI_API_KEY}`;
 	}
 
 	try {
-		// Make HTTP request to NCBI E-utilities API to search for articles
+		// Execute the API request through the shared throttle.
 		const response = await throttle(async () => await axios.get(url));
 
-		return response.data.esearchresult.idlist; // Returns an array of PubMed Central IDs (PMCIDs)
+		return response.data.esearchresult.idlist;
 	} catch (error: unknown) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		console.error("Error fetching articles:", errorMessage, { species });

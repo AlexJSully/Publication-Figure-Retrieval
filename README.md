@@ -107,17 +107,17 @@ We aim to make this tool as perfect as possible but unfortunately, there may be 
 
 ## Documentation
 
-For comprehensive documentation, see the [`docs/`](docs/) folder:
+For comprehensive documentation, see the [docs](docs/index.md):
 
 - [**Getting Started**](docs/index.md) - Complete overview and setup guide
-- [**Architecture**](docs/architecture/) - Technical architecture and design decisions
-- [**Usage Examples**](docs/usage/examples/) - Detailed usage examples and troubleshooting
-- [**API Reference**](docs/usage/api/) - Complete API documentation
-- [**Contributing**](docs/contributing/) - Development setup and contribution guidelines
+- [**Architecture**](docs/architecture/index.md) - Technical architecture and processing flow
+- [**Usage Guide**](docs/usage/index.md) - Setup, run, and troubleshooting workflows
+- [**API Reference**](docs/usage/api/index.md) - Module-level function documentation
+- [**Contributing**](CONTRIBUTING.md) - Development setup and contribution guidelines
 
 ## License
 
-[GLP-2.0](LICENSE.md)
+[GNU GPL v2.0](LICENSE.md)
 
 ## Maintenance Mode
 

@@ -4,7 +4,7 @@ This project makes use of the following open-source dependencies and APIs:
 
 ## Open Source Dependencies
 
-The following open-source packages are used in this project. For a complete and up-to-date list, see the `package.json` file in the project root.
+The following open-source packages are used in this project. For a complete and up-to-date list, see [`package.json`](../../package.json) in the project root.
 
 - axios
 - throttled-queue

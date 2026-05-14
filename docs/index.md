@@ -223,18 +223,12 @@ Each species entry includes aliases for better search coverage:
 }
 ```
 
-## Screenshots
-
-{INSERT SCREENSHOT HERE - Terminal output showing progress}
-{INSERT SCREENSHOT HERE - File explorer showing organized output structure}
-{INSERT SCREENSHOT HERE - Example downloaded scientific figures}
-
 ## Next Steps
 
 - [Architecture Overview](./architecture/index.md) - Understand the system design
 - [Usage Guide](./usage/index.md) - Detailed usage instructions and examples
 - [API Documentation](./usage/api/index.md) - Module and function references
-- [Contributing](./contributing/index.md) - How to contribute to the project
+- [Contributing](../CONTRIBUTING.md) - How to contribute to the project
 - [FAQ](./faq.md) - Common questions and troubleshooting
 
 ## Support
