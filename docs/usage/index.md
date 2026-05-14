@@ -54,10 +54,10 @@ npm run start
 
 The tool will:
 
-1. **Load species configuration** from [`src/data/species.json`](../src/data/species.json)
+1. **Load species configuration** from [`src/data/species.json`](../../src/data/species.json)
 2. **Initialize rate limiting** (3 requests/second without API key)
 3. **Process each species** sequentially
-4. **Download article packages and extract images** into `build/output/[species]/[pmcid]/` (see [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts))
+4. **Download article packages and extract images** into `build/output/[species]/[pmcid]/` (see [`src/processor/parseFigures.ts`](../../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts))
 5. **Cache progress** for resume capability
 
 ### Example Output
@@ -293,6 +293,5 @@ cat build/output/cache/id.json | jq length
 ## Next Steps
 
 - [API Documentation](./api/index.md) - Detailed function and module references
-- [Examples](./examples/) - Specific use case examples and code samples
-- [Contributing](../contributing/index.md) - How to extend and modify the tool
+- [Contributing](../../CONTRIBUTING.md) - How to extend and modify the tool
 - [FAQ](../faq.md) - Common questions and advanced troubleshooting

@@ -25,7 +25,6 @@ The project is open-source; consult the repository [`package.json`](../package.j
 **A:**
 
 - Node.js 20 or higher
-- npm 9 or higher
 - 2GB available disk space (recommended)
 - Stable internet connection
 
@@ -42,7 +41,7 @@ cd Publication-Figure-Retrieval
 npm ci
 
 # Run the tool
-npm start
+npm run start
 ```
 
 ### Q: Do I need an API key?
@@ -76,7 +75,7 @@ Get your API key from: <https://www.ncbi.nlm.nih.gov/account/settings/>
 
 ```bash
 # This will process all species in the configuration
-npm start
+npm run start
 ```
 
 ### Q: How do I limit the number of articles searched?
@@ -178,7 +177,7 @@ const throttle = throttledQueue(2, 2000); // Slower rate
 
 ### Q: How do I contribute to the project?
 
-**A:** See our [Contributing Guide](../contributing/index.md) for detailed instructions:
+**A:** See our [Contributing Guide](../CONTRIBUTING.md) for detailed instructions:
 
 1. Fork the repository
 2. Create a branch
@@ -230,26 +229,7 @@ console.log("Debug info:", variable);
 
 ### Q: What metadata is collected?
 
-**A:** For each article:
-
-```json
-{
-	"pmcId": "PMC1234567",
-	"title": "Article Title",
-	"authors": ["Author 1", "Author 2"],
-	"journal": "Journal Name",
-	"publicationDate": "2023-01-15",
-	"doi": "10.1000/example",
-	"figureCount": 3,
-	"figures": [
-		{
-			"caption": "Figure caption",
-			"url": "https://...",
-			"filename": "figure1.jpg"
-		}
-	]
-}
-```
+**A:** The current implementation primarily tracks progress in `build/output/cache/id.json` and writes extracted image files to per-species/per-PMCID directories. It does not currently generate a per-article metadata JSON file.
 
 ### Q: How are duplicate articles handled?
 
@@ -276,4 +256,4 @@ console.log("Debug info:", variable);
 - **With API key**: 10 requests per second
 - **Large jobs**: Contact NCBI for permission
 
-Need more help? Check our [documentation](../index.md) or [open an issue](https://github.com/AlexJSully/Publication-Figure-Retrieval/issues) on GitHub.
+Need more help? Check our [documentation](./index.md) or [open an issue](https://github.com/AlexJSully/Publication-Figure-Retrieval/issues) on GitHub.

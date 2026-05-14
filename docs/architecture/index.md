@@ -157,7 +157,7 @@ graph LR
 
 **XML Structure Navigation (PMC ID extraction):**
 
-The parser locates the PMC identifier in the article front matter (see implementation: [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts)).
+The parser locates the PMC identifier in the article front matter (see implementation: [`src/processor/parseFigures.ts`](../../src/processor/parseFigures.ts)).
 
 ```xml
 <pmc-articleset>
@@ -173,15 +173,15 @@ The parser locates the PMC identifier in the article front matter (see implement
 
 ### 5. Download Module (`src/processor/downloadArticlePackage.ts`)
 
-Downloads a complete PMC article package (.tar.gz) and extracts image files. The implementation fetches a package URL from the OA Web Service API, downloads the archive, extracts media, and selects the highest-priority image format per basename before copying results to the output directory (see implementation: [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts)).
+Downloads a complete PMC article package (.tar.gz) and extracts image files. The implementation fetches a package URL from the OA Web Service API, downloads the archive, extracts media, and selects the highest-priority image format per basename before copying results to the output directory (see implementation: [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
 
 Key implementation behaviors (implementation proof):
 
-- Fetches OA package metadata via the OA API and converts FTP links to HTTPS (see [`src/processor/fetchPackageUrl.ts`](../src/processor/fetchPackageUrl.ts)).
-- Downloads the package archive and extracts it to a temporary directory (see [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts)).
-- Groups files by basename and keeps the highest-priority extension using the `IMAGE_EXTENSIONS` priority map (see [`src/constants.ts`](../src/constants.ts)).
+- Fetches OA package metadata via the OA API and converts FTP links to HTTPS (see [`src/processor/fetchPackageUrl.ts`](../../src/processor/fetchPackageUrl.ts)).
+- Downloads the package archive and extracts it to a temporary directory (see [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
+- Groups files by basename and keeps the highest-priority extension using the `IMAGE_EXTENSIONS` priority map (see [`src/constants.ts`](../../src/constants.ts)).
 
-Console-level messages written by the implementation include `Fetching package URL for <PMCID>`, `Package downloaded. Extracting images...`, `Extracted image: <filename>`, and `Successfully extracted <N> images from package.` (see [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts)).
+Console-level messages written by the implementation include `Fetching package URL for <PMCID>`, `Package downloaded. Extracting images...`, `Extracted image: <filename>`, and `Successfully extracted <N> images from package.` (see [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
 
 ## Data Flow Architecture
 
@@ -282,14 +282,14 @@ graph TB
     H --> I[Save Cache to Disk]
 ```
 
-### 4. Error Recovery and Resilience
+### 4. Error Handling and Continuation
 
-The system implements multiple levels of error recovery:
+The system logs operation-level failures and continues processing subsequent species/articles:
 
-1. **Network Level**: Automatic retries with exponential backoff
-2. **API Level**: Rate limit compliance and quota management
-3. **Data Level**: Graceful handling of malformed XML or missing figures
-4. **File Level**: Directory creation and permission handling
+1. **Search failures**: `searchArticlesBySpecies` returns an empty list on request failures
+2. **Batch fetch failures**: `fetchArticleDetails` logs batch-level errors and continues with remaining batches
+3. **Package failures**: `parseFigures` logs package-level failures and continues with remaining articles
+4. **Filesystem setup**: output/cache directories are created on demand before writes
 
 ## Performance Considerations
 
@@ -321,7 +321,6 @@ graph TD
 
 - [Dependencies](./dependencies.md) - External libraries and tools used
 - [Pipelines](./pipelines.md) - Detailed workflow diagrams
-- [Design Decisions](./design-decisions.md) - Architectural choices and trade-offs
 
 ## Real-World Scenarios
 

@@ -24,8 +24,8 @@ graph TD
     J --> L{More Species?}
     K --> M[Fetch Article Details]
     M --> N[Parse XML Content]
-    N --> O[Extract Figure URLs]
-    O --> P[Download Figures]
+    N --> O[Download Article Package]
+    O --> P[Extract Images from Package]
     P --> Q[Update Progress Cache]
     Q --> L
 
@@ -85,7 +85,7 @@ graph TD
     F --> N
 ```
 
-### Step 3: XML Parsing and Figure Extraction
+### Step 3: XML Parsing and Package Extraction
 
 ```mermaid
 graph LR
@@ -101,16 +101,16 @@ graph LR
         F --> G[Extract Figure Elements]
     end
 
-    subgraph "Figure Processing"
-        G --> H[Process Figure Graphics]
-        H --> I[Construct Figure URLs]
-        I --> J[Validate URL Format]
-        J --> K[Add .jpg if No Extension]
+    subgraph "Article Package Processing"
+        G --> H[Resolve OA Package URL]
+        H --> I[Download .tar.gz Package]
+        I --> J[Extract Package Contents]
+        J --> K[Select Highest-Priority Image Per Basename]
     end
 
     subgraph "Download Orchestration"
         K --> L[Create Output Directory]
-        L --> M[Queue Figure Download]
+        L --> M[Copy Selected Images]
         M --> N[Update Progress]
     end
 ```
@@ -238,11 +238,7 @@ sequenceDiagram
 ### Cache Structure
 
 ```json
-{
-	"cached_ids": ["PMC123456", "PMC789012", "PMC345678"],
-	"last_updated": "2024-01-15T10:30:00Z",
-	"species_processed": ["Arabidopsis_thaliana", "Cannabis_sativa"]
-}
+["PMC123456", "PMC789012", "PMC345678"]
 ```
 
 ## Performance Optimization Pipeline
@@ -332,10 +328,10 @@ graph TD
 [INFO] Found 1,234 articles for Arabidopsis_thaliana
 [INFO] Fetching Arabidopsis thaliana article details for batch 1-50...
 [INFO] Processing article PMC ID: PMC123456
-[INFO] Found 3 figures in the article.
-[INFO] Downloaded image: figure1.jpg
-[INFO] Downloaded image: figure2.png
-[INFO] Downloaded image: supplementary1.tiff
+[INFO] Fetching package URL for PMC123456...
+[INFO] Package downloaded. Extracting images...
+[INFO] Extracted image: figure1.jpg (priority: jpg)
+[INFO] Successfully extracted 1 images from package.
 [INFO] All IDs in Arabidopsis thaliana batch 51-100 are already cached.
 [INFO] Processing complete for Arabidopsis_thaliana
 ```
