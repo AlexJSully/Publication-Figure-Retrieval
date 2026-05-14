@@ -17,6 +17,7 @@
 		// },
 
 		/* Emit */
+		"rootDir": "./src" /* Specify the root folder within your source files. */,
 		"outDir": "./build" /* Specify an output folder for all emitted files. */,
 
 		/* Interop Constraints */
