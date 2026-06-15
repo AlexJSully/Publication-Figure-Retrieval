@@ -32,6 +32,9 @@ This tool is particularly valuable for researchers in bioinformatics, comparativ
 
 ```mermaid
 graph TD
+    accTitle: End-to-End Figure Retrieval Workflow
+    accDescr: The tool starts, loads the species list, and for each species searches PMC articles, gets PMC IDs, fetches article details, parses the XML response, downloads the article package, extracts images, and saves them to a species and PMC ID directory before moving to the next species until all are complete.
+
     A[Start] --> B[Load Species List]
     B --> C[For Each Species]
     C --> D[Search PMC Articles]
@@ -123,6 +126,9 @@ Get your API key from [NCBI](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/ne
 
 ```mermaid
 sequenceDiagram
+    accTitle: Data Flow Between Pipeline Functions and PMC
+    accDescr: The user runs npm run start, which calls main. Main calls searchArticlesBySpecies, which queries the PMC esearch endpoint and returns PMC IDs. Main then calls fetchArticleDetails, which queries the efetch endpoint in batches and receives XML. fetchArticleDetails calls parseFigures, which calls downloadArticlePackage to download and extract images that are saved to disk and returned to the user as organized files.
+
     participant User
     participant Main
     participant Search
@@ -205,13 +211,16 @@ rm build/output/cache/id.json
 
 ## Supported Species
 
-The tool processes species defined in `src/data/species.json`. Currently includes:
+The tool processes 27 plant species defined in [`src/data/species.json`](../src/data/species.json). These include:
 
 - Arabidopsis thaliana (model plant)
-- Cannabis sativa
-- Homo sapiens
-- Mus musculus
-- And many more...
+- Cannabis sativa (hemp)
+- Oryza sativa (rice)
+- Triticum aestivum (wheat)
+- Zea mays (maize)
+- Glycine max (soybean)
+- Solanum lycopersicum (tomato)
+- And 20 more...
 
 Each species entry includes aliases for better search coverage:
 

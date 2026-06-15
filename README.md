@@ -8,7 +8,7 @@ This tool provides a method for retrieving figures from NCBI's [PMC](https://www
 
 ## Features
 
-- **Automated Species Search**: Searches for publications related to 30+ plant species
+- **Automated Species Search**: Searches for publications related to 27 plant species
 - **Figure Extraction**: Downloads high-quality figures from PMC articles
 - **Resume Capability**: Caches processed PMC IDs to resume interrupted downloads
 - **Rate Limiting**: Respects NCBI API limits (3 requests/second, 10 with API key)
@@ -88,8 +88,7 @@ build/output/
 ├── Arabidopsis_thaliana/
 │   ├── PMC123456/
 │   │   ├── figure1.jpg
-│   │   ├── figure2.png
-│   │   └── metadata.json          # Article metadata
+│   │   └── figure2.png
 │   └── PMC789012/
 │       └── figure1.svg
 ├── Cannabis_sativa/

@@ -11,7 +11,7 @@
  * - png: Lossless compression, supports transparency
  * - tiff: High quality, but large file sizes
  * - webp: Modern format with good compression
- * - gif: Limited colors, mainly for animations
+ * - gif: Limited colours, mainly for animations
  * - svg: Vector format, scalable
  * - ico: Icon format, typically low resolution
  * - heif: Modern format, not widely supported
