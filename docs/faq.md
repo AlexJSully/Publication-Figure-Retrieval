@@ -12,7 +12,7 @@ The Publication Figure Retrieval Tool is an open-source Node.js application that
 
 - **Input**: Species names (scientific and common names)
 - **Output**: Image formats extracted from article packages; supported extensions are defined in the code (`IMAGE_EXTENSIONS`) and include common formats such as `jpg`, `png`, `tiff`, `gif`, and `svg` (see [`src/constants.ts`](../src/constants.ts)).
-- **Data**: JSON metadata files with article and figure information
+- **Data**: A progress cache file (`build/output/cache/id.json`) that stores processed PMC IDs as a JSON array, written alongside the extracted image files
 
 ### Is this tool free to use?
 
@@ -98,7 +98,7 @@ For the example above:
 
 ### Q: Where are the downloaded figures saved?
 
-**A:** At runtime the tool writes extracted images to the `build/output/` directory (when running the compiled JavaScript). The layout is organized by species and PMC ID; the package extraction and write behavior are implemented in [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts). Example:
+**A:** At runtime the tool writes extracted images to the `build/output/` directory (when running the compiled JavaScript). The layout is organized by species and PMC ID; the package extraction and write behaviour are implemented in [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts). Example:
 
 ```text
 build/output/
@@ -120,7 +120,7 @@ build/output/
 
 ```typescript
 // In src/index.ts
-const throttle = throttledQueue(5, 1000); // 5 requests per second
+const throttle = throttledQueue({ maxPerInterval: 5, interval: 1000 }); // 5 requests per second
 ```
 
 2. **Use an API key** for better rate limits
@@ -138,10 +138,10 @@ const throttle = throttledQueue(5, 1000); // 5 requests per second
 3. **Reduce request rate**:
 
 ```typescript
-const throttle = throttledQueue(2, 2000); // Slower rate
+const throttle = throttledQueue({ maxPerInterval: 2, interval: 2000 }); // Slower rate
 ```
 
-4. **Add retry logic** (already implemented)
+4. **Note**: Failed requests are logged and skipped; the tool continues with the next item rather than retrying automatically
 
 ### Q: No figures are being downloaded. Why?
 
@@ -153,7 +153,7 @@ const throttle = throttledQueue(2, 2000); // Slower rate
 
 2. **Articles have no figures**:
     - Some articles may not contain extractable figures
-    - Check the metadata files for article details
+    - Check the console output for per-article processing logs
 
 3. **Network issues**:
     - Check console output for error messages

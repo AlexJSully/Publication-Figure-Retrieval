@@ -17,7 +17,7 @@ import { downloadArticlePackage } from "./downloadArticlePackage";
  * @returns {Promise<void>} A promise that resolves when all article packages have been processed.
  *
  * @example
- * const throttle = throttledQueue(2, 1000);
+ * const throttle = throttledQueue({ maxPerInterval: 2, interval: 1000 });
  * const xmlData = "<xml>mock data</xml>";
  * const species = "Homo sapiens";
  * await parseFigures(throttle, xmlData, species);

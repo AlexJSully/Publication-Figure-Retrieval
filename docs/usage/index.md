@@ -64,11 +64,10 @@ The tool will:
 
 ```bash
 Searching articles for the species: Arabidopsis_thaliana...
-Found 1,247 articles for Arabidopsis_thaliana
 Fetching Arabidopsis thaliana article details for batch 1-50...
 Processing article PMC ID: PMC123456
 Fetching package URL for PMC123456...
-Downloading package from https://.../PMC123456.tar.gz
+Downloading package from https://.../PMC123456.tar.gz...
 Package downloaded. Extracting images...
 Extracted image: figure1.jpg (priority: jpg)
 Extracted image: figure2.png (priority: png)
@@ -191,6 +190,9 @@ tail -f output.log  # If you redirect output to a log file
 
 ```mermaid
 graph TD
+    accTitle: Research Dataset Creation Workflow
+    accDescr: A researcher defines a research question, selects target species, edits species.json, configures an API key, runs the tool, monitors progress, verifies downloads, and analyzes the resulting figures.
+
     A[Define Research Question] --> B[Select Target Species]
     B --> C[Edit species.json]
     C --> D[Configure API Key]
@@ -214,6 +216,9 @@ graph TD
 
 ```mermaid
 sequenceDiagram
+    accTitle: Comparative Analysis Workflow
+    accDescr: A researcher configures target species and the tool searches PMC for articles. PMC returns article lists, the tool downloads figures, and PMC returns figure files. The tool hands the researcher an organized figure dataset, which the researcher loads into analysis software to obtain comparative results.
+
     participant R as Researcher
     participant T as Tool
     participant PMC as PMC Database

@@ -8,6 +8,9 @@ The Publication Figure Retrieval Tool follows a modular, pipeline-based architec
 
 ```mermaid
 graph TB
+    accTitle: High-Level System Architecture
+    accDescr: Inputs (species configuration, environment variables, and API keys) feed the main orchestrator, which drives the search, fetch, parse, and download modules. The search and fetch modules call the NCBI E-utilities API and PMC database. The download module writes to the output file system, cache, and progress tracking. A throttled queue mediates the search, fetch, and download API requests under an API rate controller.
+
     subgraph "Input Layer"
         A[Species Configuration]
         B[Environment Variables]
@@ -71,6 +74,9 @@ The central coordinator that manages the entire workflow:
 
 ```mermaid
 flowchart TD
+    accTitle: Main Orchestrator Control Flow
+    accDescr: The orchestrator initializes the throttle queue, loads the species list, and processes each species by searching articles. If articles are found it fetches article details, otherwise it logs that no articles were found. It then processes the next species, repeating until no species remain, at which point it completes.
+
     A[Initialize Throttle Queue] --> B[Load Species List]
     B --> C[Process Each Species]
     C --> D[Search Articles by Species]
@@ -97,6 +103,9 @@ Handles publication discovery through NCBI's E-utilities API:
 
 ```mermaid
 sequenceDiagram
+    accTitle: Search Module Request Sequence
+    accDescr: The search module constructs a query string and sends a GET request to the NCBI esearch endpoint with the PMC database and species term. The API returns a JSON response containing PMC IDs. The module extracts the ID list and returns the PMC ID array to the caller.
+
     participant SM as Search Module
     participant API as NCBI E-utilities
     participant Cache as Local Cache
@@ -124,6 +133,9 @@ Retrieves detailed article metadata and content:
 
 ```mermaid
 graph TD
+    accTitle: Fetch Module Batch Processing
+    accDescr: The fetch module batches PMC IDs and checks the cache. Already-cached batches are skipped, while uncached batches are fetched as article details, parsed from XML, and recorded in the cache before figures are processed. Each batch leads to the next until all are handled.
+
     A[Batch PMC IDs] --> B[Check Cache]
     B --> C{Already Cached?}
     C -->|Yes| D[Skip Batch]
@@ -147,6 +159,9 @@ Processes XML article data to extract PMC IDs and orchestrate package downloads:
 
 ```mermaid
 graph LR
+    accTitle: Parse Module Figure Extraction
+    accDescr: The parse module takes XML article data, parses its structure, extracts the article metadata, locates the PMC ID, requests the article package, extracts images from the package, and saves the images to the file system.
+
         A[XML Article Data] --> B[Parse XML Structure]
         B --> C[Extract Article Metadata]
         C --> D[Locate PMC ID]
@@ -175,7 +190,7 @@ The parser locates the PMC identifier in the article front matter (see implement
 
 Downloads a complete PMC article package (.tar.gz) and extracts image files. The implementation fetches a package URL from the OA Web Service API, downloads the archive, extracts media, and selects the highest-priority image format per basename before copying results to the output directory (see implementation: [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
 
-Key implementation behaviors (implementation proof):
+Key implementation behaviours (implementation proof):
 
 - Fetches OA package metadata via the OA API and converts FTP links to HTTPS (see [`src/processor/fetchPackageUrl.ts`](../../src/processor/fetchPackageUrl.ts)).
 - Downloads the package archive and extracts it to a temporary directory (see [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
@@ -189,6 +204,9 @@ Console-level messages written by the implementation include `Fetching package U
 
 ```mermaid
 graph TD
+    accTitle: Primary Data Pipeline
+    accDescr: The species list generates species queries that drive the PMC search and article-detail API calls. Responses are parsed from XML, the PMC ID is extracted, the article package is requested and its images extracted. Output directories are created and images written to the file system. A progress cache records completed work, and resume logic skips already-processed PMC IDs when fetching article details.
+
     subgraph "Input Processing"
         A[Species List] --> B[Species Query Generation]
     end
@@ -221,19 +239,21 @@ graph TD
 
 ```mermaid
 graph TD
+    accTitle: Error Handling and Continuation Flow
+    accDescr: When an operation runs, the tool checks whether an error occurred. If not, processing continues. If an error occurs, the tool classifies where it happened. A species search error is logged with console.error and returns an empty array. An article batch fetch error is logged and processing continues with the next batch. An article package error is logged and processing continues with the next article, with an extra log when the message mentions the Open Access subset. The tool does not retry or apply backoff.
+
     A[Operation Start] --> B{Error Occurred?}
     B -->|No| C[Continue Processing]
-    B -->|Yes| D{Error Type?}
-    D -->|Network| E[Retry with Backoff]
-    D -->|API Limit| F[Wait and Retry]
-    D -->|Invalid Data| G[Log and Skip]
-    D -->|File System| H[Create Directories]
-    E --> I{Retry Count < 3?}
-    I -->|Yes| A
-    I -->|No| G
-    F --> A
-    G --> C
-    H --> A
+    B -->|Yes| D{Where did it occur?}
+    D -->|Species search| E[console.error and return empty array]
+    D -->|Article batch fetch| F[console.error and continue next batch]
+    D -->|Article package| G[console.error and continue next article]
+    G --> H{Message mentions Open Access subset?}
+    H -->|Yes| I[Log article not in Open Access subset]
+    H -->|No| C
+    I --> C
+    E --> C
+    F --> C
     C --> J[Operation Complete]
 ```
 
@@ -252,6 +272,9 @@ Each module has a single, well-defined responsibility:
 
 ```mermaid
 graph LR
+    accTitle: Rate Limiting Strategy
+    accDescr: An API request enters the throttled queue, which checks the rate limit. Requests within the limit execute immediately, while requests that exceed it are queued until a slot is available and then executed. Each executed request updates the rate counter.
+
     A[API Request] --> B[Throttled Queue]
     B --> C{Rate Limit Check}
     C -->|Within Limits| D[Execute Request]
@@ -271,6 +294,9 @@ graph LR
 
 ```mermaid
 graph TB
+    accTitle: Caching and Resume Capability
+    accDescr: At process start the tool checks for the cache file. If it exists, the cached PMC IDs are loaded; if not, an empty cache is initialized. New PMC IDs are filtered from the cache, processed, and the cache is updated and saved to disk.
+
     A[Process Start] --> B[Check Cache File]
     B --> C{Cache Exists?}
     C -->|Yes| D[Load Cached PMC IDs]
@@ -297,9 +323,12 @@ The system logs operation-level failures and continues processing subsequent spe
 
 ```mermaid
 graph TD
+    accTitle: Memory Management Through Batching
+    accDescr: A large dataset is handled through batch processing. The tool processes 50 PMC IDs at a time, so only one batch is held in memory at once and the previous batch becomes eligible for garbage collection, repeating until no batches remain.
+
     A[Large Dataset] --> B[Batch Processing]
     B --> C[Process 50 PMC IDs]
-    C --> D[Clear Memory]
+    C --> D[Previous Batch Eligible for GC]
     D --> E{More Batches?}
     E -->|Yes| C
     E -->|No| F[Complete]

@@ -60,7 +60,7 @@ flowchart TD
 ### `main(): Promise<void>`
 
 - Location: [`src/index.ts`](../../../src/index.ts)
-- Behavior:
+- Behaviour:
     - Configures API request throughput via `throttled-queue`
     - Iterates all species keys in [`src/data/species.json`](../../../src/data/species.json)
     - Dispatches species-level processing through `searchArticlesBySpecies` and `fetchArticleDetails`
@@ -68,7 +68,7 @@ flowchart TD
 ### `searchArticlesBySpecies(throttle, species): Promise<string[]>`
 
 - Location: [`src/processor/searchArticleBySpecies.ts`](../../../src/processor/searchArticleBySpecies.ts)
-- Behavior:
+- Behaviour:
     - Builds an NCBI ESearch query with `term=<species>[organism]`
     - Calls `esearch.fcgi` with `db=pmc`, `retmode=json`, and `retmax=1000000`
     - Adds `api_key` when `NCBI_API_KEY` is present
@@ -78,7 +78,7 @@ flowchart TD
 ### `fetchArticleDetails(throttle, pmids, species): Promise<void>`
 
 - Location: [`src/processor/fetchArticleDetails.ts`](../../../src/processor/fetchArticleDetails.ts)
-- Behavior:
+- Behaviour:
     - Reads/writes cached IDs in `build/output/cache/id.json`
     - Splits IDs into 50-item batches
     - Skips IDs already present in cache
@@ -89,7 +89,7 @@ flowchart TD
 ### `parseFigures(throttle, xmlData, species): Promise<void>`
 
 - Location: [`src/processor/parseFigures.ts`](../../../src/processor/parseFigures.ts)
-- Behavior:
+- Behaviour:
     - Parses XML with `xml2js`
     - Extracts each article's PMC ID from `article.front[0]["article-meta"][0]["article-id"]`
     - Creates per-article output directories under `build/output`
@@ -99,7 +99,7 @@ flowchart TD
 ### `downloadArticlePackage(throttle, pmcId, outputDir): Promise<string[]>`
 
 - Location: [`src/processor/downloadArticlePackage.ts`](../../../src/processor/downloadArticlePackage.ts)
-- Behavior:
+- Behaviour:
     - Resolves OA package links via `fetchPackageUrl`
     - Downloads a `.tar.gz` package stream
     - Extracts package contents with `tar`
@@ -111,7 +111,7 @@ flowchart TD
 ### `fetchPackageUrl(pmcId): Promise<PackageInfo>`
 
 - Location: [`src/processor/fetchPackageUrl.ts`](../../../src/processor/fetchPackageUrl.ts)
-- Behavior:
+- Behaviour:
     - Calls PMC OA service endpoint `https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi`
     - Normalizes IDs to `PMC...`
     - Parses XML response and extracts package links
@@ -121,4 +121,5 @@ flowchart TD
 ## Notes
 
 - `extractFigureUrls` in [`src/processor/extractFigureUrls.ts`](../../../src/processor/extractFigureUrls.ts) is currently a standalone utility and is not invoked by the active main pipeline.
+- `fetchPackageUrlsBatch` in [`src/processor/fetchPackageUrl.ts`](../../../src/processor/fetchPackageUrl.ts) is also exported but not invoked by the active main pipeline; the pipeline uses `fetchPackageUrl` for one article at a time.
 - Cache file format is a JSON array of PMC ID strings, not an object.

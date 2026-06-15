@@ -8,6 +8,9 @@ The `searchArticleBySpecies` module handles the discovery of scientific publicat
 
 ```mermaid
 graph TD
+    accTitle: searchArticlesBySpecies Module Architecture
+    accDescr: A species name is turned into a query, which is sent to the NCBI esearch API. The JSON response is processed to extract the PMC ID list, which is returned as an array. If the API call raises a network error, the error is logged and an empty array is returned.
+
     A[Species Name Input] --> B[Query Construction]
     B --> C[NCBI E-search API Call]
     C --> D[JSON Response Processing]
@@ -32,10 +35,10 @@ export async function searchArticlesBySpecies(throttle: ThrottleFunction, specie
 
 ### Parameters
 
-| Parameter  | Type     | Required | Description                                                      |
-| ---------- | -------- | -------- | ---------------------------------------------------------------- |
-| `throttle` | `any`    | Yes      | Throttling function from `throttled-queue` for API rate limiting |
-| `species`  | `string` | Yes      | Species name in underscore format (e.g., "Homo_sapiens")         |
+| Parameter  | Type               | Required | Description                                                      |
+| ---------- | ------------------ | -------- | ---------------------------------------------------------------- |
+| `throttle` | `ThrottleFunction` | Yes      | Throttling function from `throttled-queue` for API rate limiting |
+| `species`  | `string`           | Yes      | Species name in underscore format (e.g., "Homo_sapiens")         |
 
 ### Return Value
 
@@ -64,11 +67,11 @@ const params = {
 ```typescript
 // Human articles
 const humanQuery = "Homo_sapiens[organism]";
-// URL: ...esearch.fcgi?db=pmc&term=Homo_sapiens%5Borganism%5D&retmode=json
+// URL: ...esearch.fcgi?db=pmc&term=Homo_sapiens%5Borganism%5D&retmode=json&retmax=1000000
 
 // Plant model organism
 const plantQuery = "Arabidopsis_thaliana[organism]";
-// URL: ...esearch.fcgi?db=pmc&term=Arabidopsis_thaliana%5Borganism%5D&retmode=json
+// URL: ...esearch.fcgi?db=pmc&term=Arabidopsis_thaliana%5Borganism%5D&retmode=json&retmax=1000000
 ```
 
 ### Usage Examples
@@ -201,6 +204,9 @@ console.log(pmcIds); // [] (empty array, not an error)
 
 ```mermaid
 sequenceDiagram
+    accTitle: searchArticlesBySpecies Pipeline Integration
+    accDescr: The main process calls searchArticlesBySpecies with a species name. The function sends an HTTP GET request to NCBI esearch and receives a JSON response with PMC IDs, which it returns to the main process. If PMC IDs are found, the main process passes them to fetchArticleDetails; otherwise it logs that no articles were found.
+
     participant M as Main Process
     participant S as searchArticlesBySpecies
     participant API as NCBI E-search
