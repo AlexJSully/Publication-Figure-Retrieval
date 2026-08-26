@@ -16,12 +16,10 @@ The following open-source packages are used in this project. For a complete and 
 - ts-jest
 - @types/jest
 - eslint
-- eslint-config-prettier
 - eslint-plugin-node
-- eslint-plugin-prettier
 - prettier
 - @trivago/prettier-plugin-sort-imports
-- markdownlint-cli
+- markdownlint-cli2
 - globals
 
 We thank the maintainers and contributors of these open-source projects for their work.

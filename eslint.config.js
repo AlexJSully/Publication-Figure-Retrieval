@@ -1,4 +1,3 @@
-const eslintPluginPrettier = require("eslint-plugin-prettier");
 const globals = require("globals");
 const eslintPluginNode = require("eslint-plugin-node");
 
@@ -27,7 +26,6 @@ module.exports = [
 		},
 		plugins: {
 			node: eslintPluginNode,
-			prettier: eslintPluginPrettier,
 		},
 		rules: {
 			"class-methods-use-this": "off",
@@ -39,7 +37,6 @@ module.exports = [
 			"no-param-reassign": "off",
 			"no-restricted-syntax": "off",
 			"no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-			"prettier/prettier": "warn",
 			radix: "off",
 			semi: ["error", "always"],
 		},

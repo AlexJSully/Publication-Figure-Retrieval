@@ -23,7 +23,7 @@ This tool is particularly valuable for researchers in bioinformatics, comparativ
 
 ## System Requirements
 
-- **Node.js**: Version 20 or higher
+- **Node.js**: Version 24 or higher
 - **RAM**: Minimum 4GB recommended
 - **Internet**: 7+ Mbps download speed recommended
 - **Storage**: Varies based on number of figures downloaded

@@ -24,7 +24,7 @@ The project is open-source; consult the repository [`package.json`](../package.j
 
 **A:**
 
-- Node.js 20 or higher
+- Node.js 24 or higher
 - 2GB available disk space (recommended)
 - Stable internet connection
 

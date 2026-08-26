@@ -1,0 +1,4 @@
+{
+	"globs": ["**/*.md", "**/*.MD", ".github/**/*.md"],
+	"ignores": ["node_modules/**", "build/**", "coverage/**"],
+}
