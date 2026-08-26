@@ -1,5 +1,4 @@
 {
-	// markdownlint-cli2 has no default ignores and does not read .markdownlintignore.
 	"globs": ["**/*.md", "**/*.MD", ".github/**/*.md"],
 	"ignores": ["node_modules/**", "build/**", "coverage/**"],
 }

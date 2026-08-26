@@ -21,7 +21,7 @@ This code is maintained for educational and historical reference purposes only. 
 
 ## Requirements
 
-- **Node.js**: Version 20 or higher
+- **Node.js**: Version 24 or higher
 - **RAM**: 4GB minimum
 - **Internet**: Stable connection with >7MB/s download speed
 

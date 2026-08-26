@@ -8,7 +8,7 @@ This guide provides step-by-step instructions for using the Publication Figure R
 
 Before you begin, ensure your system meets the following requirements:
 
-- **Node.js**: Version 20 or higher
+- **Node.js**: Version 24 or higher
 - **RAM**: Minimum 4GB available
 - **Internet**: Stable connection with 7+ Mbps download speed
 
