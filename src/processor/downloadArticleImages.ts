@@ -8,10 +8,9 @@ import {
 	PMC_CLOUD_BASE_URL,
 	PMC_CLOUD_BUCKET,
 	PMC_CLOUD_REQUEST_TIMEOUT_MS,
-	PMC_ID_PATTERN,
 } from "../constants";
 import type { ArticleMetadata, ThrottleFunction } from "../types";
-import { fetchArticleMetadata } from "./fetchArticleMetadata";
+import { assertValidPmcId, fetchArticleMetadata } from "./fetchArticleMetadata";
 
 /** An image object in the PMC Cloud Service bucket. */
 interface ImageObject {
@@ -46,10 +45,7 @@ export async function downloadArticleImages(
 	pmcId: string,
 	outputDir: string,
 ): Promise<string[]> {
-	// The PMC ID comes from fetched article XML, is put into request URLs, and callers build `outputDir` from it
-	if (typeof pmcId !== "string" || !PMC_ID_PATTERN.test(pmcId)) {
-		throw new Error(`Invalid PMC ID: ${JSON.stringify(pmcId)}`);
-	}
+	assertValidPmcId(pmcId);
 
 	console.log(`Fetching metadata for ${pmcId}...`);
 	const metadata = await throttle(async () => await fetchArticleMetadata(pmcId));
@@ -121,7 +117,9 @@ function parseImageUrl(mediaUrl: string, versionPrefix: string): ImageObject | u
 	if (!key.startsWith(versionPrefix)) return undefined;
 
 	const fileName = key.slice(versionPrefix.length);
-	if (fileName.includes("/") || !IMAGE_EXTENSION_PATTERN.test(fileName)) return undefined;
+	// Rejects a name that a POSIX or Win32 path would split into directories or a drive
+	const isBareFileName = fileName === path.posix.basename(fileName) && fileName === path.win32.basename(fileName);
+	if (!isBareFileName || !IMAGE_EXTENSION_PATTERN.test(fileName)) return undefined;
 
 	return { key, fileName, md5: url.searchParams.get("md5") };
 }

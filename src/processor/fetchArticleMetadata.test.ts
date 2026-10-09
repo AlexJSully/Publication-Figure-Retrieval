@@ -63,6 +63,28 @@ describe("fetchArticleMetadata", () => {
 			"Failed to fetch metadata for PMC123: Request failed with status code 500",
 		);
 	});
+
+	it.each([
+		{ field: "article", metadataClaims: { pmcid: "PMC999" }, want: "names PMC999.1, not PMC123.1" },
+		{ field: "version", metadataClaims: { version: 2 }, want: "names PMC123.2, not PMC123.1" },
+	])("rejects metadata naming a different $field than the one requested", async ({ metadataClaims, want }) => {
+		mockedAxios.get.mockImplementation(
+			fakePmcCloud([{ pmcid: "PMC123", version: 1, metadataClaims }]) as typeof axios.get,
+		);
+
+		await expect(fetchArticleMetadata("PMC123")).rejects.toThrow(want);
+	});
+
+	it.each([
+		{ name: "path traversal", pmcId: "../PMC1" },
+		{ name: "a path separator", pmcId: "PMC1/../2" },
+		{ name: "an empty string", pmcId: "" },
+		{ name: "a non-string value", pmcId: ["123"] as unknown as string },
+	])("rejects a PMC ID containing $name before any request", async ({ pmcId }) => {
+		await expect(fetchArticleMetadata(pmcId)).rejects.toThrow("Invalid PMC ID");
+
+		expect(mockedAxios.get).not.toHaveBeenCalled();
+	});
 });
 
 describe("withPmcPrefix", () => {

@@ -132,6 +132,23 @@ describe("downloadArticleImages", () => {
 		expect(fs.readdirSync(outputDir)).toEqual(["gr1.jpg"]);
 	});
 
+	it("never requests or writes media whose file name holds a Windows path separator or drive", async () => {
+		serve([
+			{
+				pmcid: "PMC123",
+				version: 1,
+				files: { "gr1.jpg": "own", "..\\outside.jpg": "escapes on Windows", "C:evil.jpg": "drive-relative" },
+			},
+		]);
+
+		const written = await downloadArticleImages(throttle, "PMC123", outputDir);
+
+		expect(written).toEqual(["gr1.jpg"]);
+		expect(requestedUrls().filter((url) => url.endsWith(".jpg"))).toEqual([
+			`${PMC_CLOUD_BASE_URL}/PMC123.1/gr1.jpg`,
+		]);
+	});
+
 	it("resolves with no images and creates no directory when the article has no images", async () => {
 		serve([{ pmcid: "PMC123", version: 1, files: { "mmc1.doc": "doc" } }]);
 

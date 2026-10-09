@@ -13,6 +13,8 @@ export interface FakeArticle {
 	files?: Record<string, string | Buffer>;
 	/** Media URLs listed in the metadata JSON; defaults to one URL per entry in `files`, carrying its true MD5. */
 	mediaUrls?: string[];
+	/** Identity the metadata JSON claims; defaults to the version's own `pmcid` and `version`. */
+	metadataClaims?: { pmcid?: string; version?: number };
 }
 
 /** A request handler with the shape of `axios.get`, as passed to `mockImplementation`. */
@@ -64,7 +66,13 @@ export function fakePmcCloud(articles: FakeArticle[], failingUrls: string[] = []
 						mediaUrl(article.pmcid, article.version, name, md5Of(content)),
 					);
 
-				return { data: { pmcid: article.pmcid, version: article.version, media_urls: mediaUrls } };
+				return {
+					data: {
+						pmcid: article.metadataClaims?.pmcid ?? article.pmcid,
+						version: article.metadataClaims?.version ?? article.version,
+						media_urls: mediaUrls,
+					},
+				};
 			}
 
 			for (const [name, content] of Object.entries(files)) {

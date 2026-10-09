@@ -1,6 +1,6 @@
 import axios from "axios";
 import xml2js from "xml2js";
-import { PMC_CLOUD_BASE_URL, PMC_CLOUD_REQUEST_TIMEOUT_MS } from "../constants";
+import { PMC_CLOUD_BASE_URL, PMC_CLOUD_REQUEST_TIMEOUT_MS, PMC_ID_PATTERN } from "../constants";
 import type { ArticleMetadata } from "../types";
 
 /** Error thrown when an article has no version in the PMC Article Datasets. */
@@ -9,6 +9,19 @@ export class ArticleNotInDatasetError extends Error {
 	constructor(pmcId: string) {
 		super(`Article ${pmcId} is not in the PMC Article Datasets`);
 		this.name = "ArticleNotInDatasetError";
+	}
+}
+
+/**
+ * Throws unless `pmcId` is a string of "PMC" followed by digits, or digits alone.
+ *
+ * PMC IDs come from fetched article XML and are put into request URLs and file paths.
+ *
+ * @throws Error if the PMC ID does not match {@link PMC_ID_PATTERN}
+ */
+export function assertValidPmcId(pmcId: unknown): asserts pmcId is string {
+	if (typeof pmcId !== "string" || !PMC_ID_PATTERN.test(pmcId)) {
+		throw new Error(`Invalid PMC ID: ${JSON.stringify(pmcId)}`);
 	}
 }
 
@@ -24,13 +37,15 @@ export function withPmcPrefix(pmcId: string): string {
  *
  * @param pmcId - The PMC ID, with or without the "PMC" prefix
  * @returns Metadata of the highest-numbered article version
+ * @throws Error if the PMC ID is not "PMC" followed by digits, or digits alone
  * @throws ArticleNotInDatasetError if the article has no version in the dataset
- * @throws Error if a request to the bucket fails
+ * @throws Error if a request to the bucket fails, or the metadata names a different article version
  *
  * @see https://pmc-oa-opendata.s3.amazonaws.com/README.txt
  * @see https://pmc.ncbi.nlm.nih.gov/tools/pmcaws/
  */
 export async function fetchArticleMetadata(pmcId: string): Promise<ArticleMetadata> {
+	assertValidPmcId(pmcId);
 	const pmcIdWithPrefix = withPmcPrefix(pmcId);
 
 	try {
@@ -48,6 +63,12 @@ export async function fetchArticleMetadata(pmcId: string): Promise<ArticleMetada
 			`${PMC_CLOUD_BASE_URL}/metadata/${pmcIdWithPrefix}.${version}.json`,
 			{ timeout: PMC_CLOUD_REQUEST_TIMEOUT_MS },
 		);
+
+		// Image selection trusts these fields to scope media to this article version
+		const { pmcid, version: metadataVersion } = metadata.data;
+		if (pmcid !== pmcIdWithPrefix || metadataVersion !== version) {
+			throw new Error(`Metadata names ${pmcid}.${metadataVersion}, not ${pmcIdWithPrefix}.${version}`);
+		}
 
 		return metadata.data;
 	} catch (error) {

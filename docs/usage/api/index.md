@@ -14,6 +14,7 @@ The PMC Cloud Service metadata helpers used by the downloader and the cache are 
 
 - [`fetchArticleMetadata`](../../../src/processor/fetchArticleMetadata.ts)
 - [`withPmcPrefix`](../../../src/processor/fetchArticleMetadata.ts)
+- [`assertValidPmcId`](../../../src/processor/fetchArticleMetadata.ts)
 - [`ArticleNotInDatasetError`](../../../src/processor/fetchArticleMetadata.ts)
 
 ## Execution Order
@@ -106,9 +107,10 @@ flowchart TD
 
 - Location: [`src/processor/downloadArticleImages.ts`](../../../src/processor/downloadArticleImages.ts)
 - Behaviour:
-    - Throws `Invalid PMC ID` unless the ID is `PMC` followed by digits, or digits alone (`PMC_ID_PATTERN` in [`src/constants.ts`](../../../src/constants.ts))
+    - Throws `Invalid PMC ID` through `assertValidPmcId` unless the ID is `PMC` followed by digits, or digits alone
     - Fetches the article metadata with `fetchArticleMetadata` inside the throttle
     - Selects image media URLs in the `pmc-oa-opendata` bucket under the article version's own `<pmcid>.<version>/` prefix, keeping one file per figure basename by the extension priority in [`src/constants.ts`](../../../src/constants.ts)
+    - Skips any media file name containing a `/` or `\` separator or a drive prefix such as `C:`
     - Logs `No images found for <id>.` and returns `[]` when no image is selected
     - Downloads each selected image one at a time from `https://pmc-oa-opendata.s3.amazonaws.com`, outside the throttle
     - Verifies each image against the MD5 digest in the media URL's `md5` query parameter and writes only verified images
@@ -120,12 +122,13 @@ flowchart TD
 
 - Location: [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts)
 - Behaviour:
+    - Throws `Invalid PMC ID` through `assertValidPmcId` before any request
     - Normalizes the ID to `PMC...` with `withPmcPrefix`
     - Lists the PMC Cloud Service bucket under the `<pmcid>.` prefix with an S3 `ListObjectsV2` request
     - Picks the highest-numbered article version from the `<pmcid>.<version>/` prefixes
     - Fetches `metadata/<pmcid>.<version>.json` from the bucket
     - Throws `ArticleNotInDatasetError` when the article has no version in the PMC Article Datasets
-    - Throws `Failed to fetch metadata for <pmcid>: <message>` when a request to the bucket fails
+    - Throws `Failed to fetch metadata for <pmcid>: <message>` when a request to the bucket fails, or when the metadata's `pmcid` and `version` are not the ones requested
     - Uses a 30 second request timeout (`PMC_CLOUD_REQUEST_TIMEOUT_MS`)
 
 ### `withPmcPrefix(pmcId): string`
@@ -133,6 +136,12 @@ flowchart TD
 - Location: [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts)
 - Behaviour:
     - Returns the ID unchanged when it starts with `PMC`, otherwise prefixes it with `PMC`
+
+### `assertValidPmcId(pmcId): asserts pmcId is string`
+
+- Location: [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts)
+- Behaviour:
+    - Throws `Invalid PMC ID: <id>` unless the ID is a string of `PMC` followed by digits, or digits alone (`PMC_ID_PATTERN` in [`src/constants.ts`](../../../src/constants.ts))
 
 ### `ArticleNotInDatasetError`
 
