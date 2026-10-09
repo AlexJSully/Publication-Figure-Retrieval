@@ -80,4 +80,13 @@ describe("searchArticlesBySpecies", () => {
 
 		consoleErrorSpy.mockRestore();
 	});
+
+	it("limits the search to articles in the PMC Article Datasets", async () => {
+		mockedAxios.get.mockResolvedValue({ data: { esearchresult: { idlist: [] } } });
+
+		await searchArticlesBySpecies(throttle, "Homo_sapiens");
+
+		const term = new URL(mockedAxios.get.mock.calls[0][0]).searchParams.get("term");
+		expect(term).toBe("Homo_sapiens[organism] AND (open_access[Filter] OR author_manuscript[Filter])");
+	});
 });

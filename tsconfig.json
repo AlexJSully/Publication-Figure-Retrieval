@@ -33,5 +33,6 @@
 		/* Types */
 		"types": ["node", "jest"] /* Specify type declaration files to be included in the compilation. */
 	},
-	"include": ["src/**/*"]
+	"include": ["src/**/*"],
+	"exclude": ["src/**/*.test.ts", "src/__fixtures__"]
 }

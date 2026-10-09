@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Publication Figure Retrieval Tool is a specialized utility that automatically downloads scientific figures from publications in NCBI's PubMed Central (PMC) database. It processes a predefined list of species, searches for relevant open-access publications, and downloads all associated figures in an organized directory structure.
+The Publication Figure Retrieval Tool is a specialized utility that automatically downloads scientific figures from publications in NCBI's PubMed Central (PMC) database. It processes a predefined list of species, searches for relevant open-access publications and author manuscripts, and downloads all associated figures from the PMC Cloud Service in an organized directory structure.
 
 This tool is particularly valuable for researchers in bioinformatics, comparative biology, and data mining who need to analyze scientific figures across multiple publications for specific organisms.
 
@@ -10,7 +10,7 @@ This tool is particularly valuable for researchers in bioinformatics, comparativ
 
 - **Educational and Historical Use Only**: This code is maintained primarily for educational and historical reference purposes
 - **NCBI Policy Compliance**: Usage must comply with NCBI's policies and rate limits
-- **Open Access Only**: The tool only accesses open-access publications from PMC
+- **Article search**: ESearch queries include the `open_access` and `author_manuscript` filters. The retrieval pipeline checks for each article's version in the PMC Cloud Service before downloading images (see [`searchArticlesBySpecies`](../src/processor/searchArticleBySpecies.ts) and [`fetchArticleMetadata`](../src/processor/fetchArticleMetadata.ts)).
 - **Use at Your Own Risk**: Users are responsible for ensuring their usage complies with applicable policies and terms of service
 
 ## Key Features
@@ -33,7 +33,7 @@ This tool is particularly valuable for researchers in bioinformatics, comparativ
 ```mermaid
 graph TD
     accTitle: End-to-End Figure Retrieval Workflow
-    accDescr: The tool starts, loads the species list, and for each species searches PMC articles, gets PMC IDs, fetches article details, parses the XML response, downloads the article package, extracts images, and saves them to a species and PMC ID directory before moving to the next species until all are complete.
+    accDescr: The tool starts, loads the species list, and for each species searches PMC articles, gets PMC IDs, fetches article details, parses the XML response, fetches each article's metadata from the PMC Cloud Service, downloads the article's images and verifies each one's MD5 digest, and saves the verified images to a species and PMC ID directory before moving to the next species until all are complete.
 
     A[Start] --> B[Load Species List]
     B --> C[For Each Species]
@@ -41,8 +41,8 @@ graph TD
     D --> E[Get Article PMC IDs]
     E --> F[Fetch Article Details]
     F --> G[Parse XML Response]
-    G --> H[Download Article Package]
-    H --> I[Extract Images from Package]
+    G --> H[Fetch Article Metadata from PMC Cloud Service]
+    H --> I[Download Images and Verify MD5]
     I --> J[Save to Species/PMCID Directory]
     J --> K{More Species?}
     K -->|Yes| C
@@ -107,8 +107,8 @@ The tool will:
 
 1. Read species from [`src/data/species.json`](../src/data/species.json)
 2. Search PMC for each species (see [`src/processor/searchArticleBySpecies.ts`](../src/processor/searchArticleBySpecies.ts))
-3. For each article: fetch article XML, identify the PMC ID, download the article package (.tar.gz) and extract images into `build/output/[species]/[pmcid]/` (see [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../src/processor/downloadArticlePackage.ts))
-4. Cache progress in `build/output/cache/id.json` to enable resume
+3. For each article: fetch article XML, identify the PMC ID, fetch the article's metadata from the PMC Cloud Service, and download its images one at a time into `build/output/[species]/[pmcid]/`, writing only images that match their MD5 digest (see [`src/processor/parseFigures.ts`](../src/processor/parseFigures.ts) and [`src/processor/downloadArticleImages.ts`](../src/processor/downloadArticleImages.ts))
+4. Cache handled articles in `build/output/cache/id.json` to enable resume; articles that failed are not cached and are retried on the next run
 
 ### With API Key (Recommended)
 
@@ -127,7 +127,7 @@ Get your API key from [NCBI](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/ne
 ```mermaid
 sequenceDiagram
     accTitle: Data Flow Between Pipeline Functions and PMC
-    accDescr: The user runs npm run start, which calls main. Main calls searchArticlesBySpecies, which queries the PMC esearch endpoint and returns PMC IDs. Main then calls fetchArticleDetails, which queries the efetch endpoint in batches and receives XML. fetchArticleDetails calls parseFigures, which calls downloadArticlePackage to download and extract images that are saved to disk and returned to the user as organized files.
+    accDescr: The user runs npm run start, which calls main. Main calls searchArticlesBySpecies, which queries the PMC esearch endpoint and returns PMC IDs. Main then calls fetchArticleDetails, which queries the efetch endpoint in batches and receives XML. fetchArticleDetails calls parseFigures, which calls downloadArticleImages for each article. downloadArticleImages lists the PMC Cloud Service bucket for the article's versions, reads the metadata of the highest version, and downloads each image, saving the images whose MD5 digest matches to disk. parseFigures returns the handled PMC IDs to fetchArticleDetails, which records them in the cache, and the user receives organized files.
 
     participant User
     participant Main
@@ -136,10 +136,11 @@ sequenceDiagram
     participant Parse
     participant Download
     participant PMC as PMC Database
+    participant Cloud as PMC Cloud Service
 
     User->>Main: npm run start
     Main->>Search: searchArticlesBySpecies()
-    Search->>PMC: esearch.fcgi?db=pmc&term=species
+    Search->>PMC: esearch.fcgi?db=pmc&term=species query
     PMC-->>Search: List of PMC IDs
     Search-->>Main: PMC IDs array
 
@@ -147,9 +148,15 @@ sequenceDiagram
     Fetch->>PMC: efetch.fcgi?db=pmc&id=batch
     PMC-->>Fetch: XML article data
 
-    Fetch->Parse: parseFigures(xmlData)
-    Parse->>Download: downloadArticlePackage(pmcId)
-    Download-->>Parse: Extracted images saved to disk
+    Fetch->>Parse: parseFigures(xmlData)
+    Parse->>Download: downloadArticleImages(pmcId)
+    Download->>Cloud: List article versions and get metadata JSON
+    Cloud-->>Download: Metadata with image URLs and MD5 digests
+    Download->>Cloud: Get each image
+    Cloud-->>Download: Image file
+    Download-->>Parse: Verified images saved to disk
+    Parse-->>Fetch: Handled PMC IDs
+    Fetch->>Fetch: Cache handled IDs
     Parse-->>User: Organized files
 ```
 
@@ -181,7 +188,7 @@ If the process is interrupted, simply run `npm run start` again. The tool will:
 
 1. Read cached PMC IDs from `build/output/cache/id.json`
 2. Skip already processed publications
-3. Continue from where it left off
+3. Continue from where it left off, retrying any article that failed on an earlier run
 
 To start fresh, delete the cache file:
 
@@ -206,8 +213,9 @@ rm build/output/cache/id.json
 ### Error Handling
 
 - Network errors are logged but don't stop execution
-- Invalid URLs are skipped
-- Partial downloads can be resumed
+- Media URLs outside the article version's own folder in the PMC Cloud Service are skipped
+- Each image is checked against the MD5 digest listed in the article metadata, and only verified images are written
+- An article with any failed image is not cached, so the next run retries it; images already verified stay on disk and are downloaded again on the retry
 
 ## Supported Species
 

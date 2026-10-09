@@ -2,6 +2,7 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import type { ThrottleFunction } from "../types";
+import { withPmcPrefix } from "./fetchArticleMetadata";
 import { parseFigures } from "./parseFigures";
 
 /**
@@ -9,7 +10,8 @@ import { parseFigures } from "./parseFigures";
  *
  * This function requests article XML from NCBI EFetch in batches of 50 IDs,
  * skips IDs already present in `build/output/cache/id.json`, and passes each
- * successful XML response to `parseFigures`.
+ * successful XML response to `parseFigures`. Only the IDs `parseFigures` reports
+ * as handled are added to the cache, so failed articles are retried on the next run.
  *
  * @returns {Promise<void>} A promise that resolves when all article details have been fetched and processed.
  *
@@ -79,10 +81,10 @@ export async function fetchArticleDetails(
 
 		try {
 			const response = await throttle(async () => await axios.get(url));
-			await parseFigures(throttle, response.data, species);
+			const handledIds = new Set((await parseFigures(throttle, response.data, species)).map(withPmcPrefix));
 
-			// Persist processed IDs so reruns can resume.
-			cachedIDs.push(...newBatch);
+			// Persist only handled IDs so reruns resume without skipping articles that failed.
+			cachedIDs.push(...newBatch.filter((id) => handledIds.has(withPmcPrefix(id))));
 			fs.writeFileSync(cachedIDsFilePath, JSON.stringify(cachedIDs, null, 2));
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : String(error);

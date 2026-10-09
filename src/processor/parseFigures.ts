@@ -1,29 +1,26 @@
 import path from "path";
 import xml2js from "xml2js";
 import type { PMCArticleSet, ThrottleFunction } from "../types";
-import { downloadArticlePackage } from "./downloadArticlePackage";
+import { downloadArticleImages } from "./downloadArticleImages";
+import { ArticleNotInDatasetError } from "./fetchArticleMetadata";
 
 /**
- * Parses XML data to extract PMC IDs and download article packages containing figures.
+ * Parses XML data to extract PMC IDs and download each article's figure images.
  *
- * This function processes the provided XML data, extracts PMC IDs for each article,
- * and downloads complete article packages from the PMC Open Access FTP service.
- * The packages are extracted to retrieve all figure images.
+ * This function processes the provided XML data, extracts the PMC ID of each article, and downloads the
+ * article's images from the PMC Cloud Service, one article at a time.
  *
- * Note: As of NCBI's infrastructure migration, direct image URLs are no longer available.
- * Images must be downloaded from article package files (.tar.gz) which contain all
- * media files for an article.
- *
- * @returns {Promise<void>} A promise that resolves when all article packages have been processed.
+ * @returns {Promise<string[]>} A promise that resolves, once every article has been processed, with the PMC IDs
+ * of articles whose image download completed, including those with no selected images, and articles that raise
+ * `ArticleNotInDatasetError`. Articles that fail for any other reason are left out so they can be retried.
  *
  * @example
  * const throttle = throttledQueue({ maxPerInterval: 2, interval: 1000 });
  * const xmlData = "<xml>mock data</xml>";
  * const species = "Homo sapiens";
- * await parseFigures(throttle, xmlData, species);
+ * const handledIds = await parseFigures(throttle, xmlData, species);
  *
- * @see https://pmc.ncbi.nlm.nih.gov/tools/oa-service/
- * @see https://pmc.ncbi.nlm.nih.gov/tools/ftp/
+ * @see https://pmc.ncbi.nlm.nih.gov/tools/pmcaws/
  */
 export async function parseFigures(
 	/** The throttling function to control the rate of downloads. */
@@ -32,53 +29,60 @@ export async function parseFigures(
 	xmlData: string,
 	/** The species name to be used in the processing of figures. */
 	species: string,
-): Promise<void> {
+): Promise<string[]> {
 	/** Parser instance to parse the XML data. */
 	const parser = new xml2js.Parser();
+	let result: PMCArticleSet;
 
-	parser.parseString(xmlData, async (err: Error | null, result: PMCArticleSet) => {
-		if (err) {
-			console.error("Error parsing XML:", err.message, { species });
-			return;
+	try {
+		result = await parser.parseStringPromise(xmlData);
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		console.error("Error parsing XML:", errorMessage, { species });
+
+		return [];
+	}
+
+	// Extract articles from parsed XML data
+	const articles = result?.["pmc-articleset"]?.article;
+	if (!articles) {
+		console.log("No articles found in the response.");
+		return [];
+	}
+
+	const handledIds: string[] = [];
+
+	for (const article of articles) {
+		const pmcIdObj = article.front?.[0]?.["article-meta"]?.[0]?.["article-id"]?.find(
+			(id) => id.$?.["pub-id-type"] === "pmc" || id.$?.["pub-id-type"] === "pmcid",
+		);
+
+		const pmcId = pmcIdObj?._;
+
+		if (!pmcId) {
+			console.log("Skipping article: PMC ID not found.");
+			continue;
 		}
 
-		// Extract articles from parsed XML data
-		const articles = result["pmc-articleset"].article;
-		if (!articles) {
-			console.log("No articles found in the response.");
-			return;
-		}
+		console.log(`Processing article PMC ID: ${pmcId}`);
 
-		// Process each article to download the complete package including all figures
-		for (const article of articles) {
-			const pmcIdObj = article.front[0]["article-meta"][0]["article-id"].find(
-				(id) => id.$["pub-id-type"] === "pmc" || id.$["pub-id-type"] === "pmcid",
-			);
+		const outputDir = path.join(__dirname, "../output", species, pmcId);
 
-			if (!pmcIdObj) {
-				console.log("Skipping article: PMC ID not found.");
+		try {
+			await downloadArticleImages(throttle, pmcId, outputDir);
+			console.log(`Successfully processed article images for ${pmcId}`);
+			handledIds.push(pmcId);
+		} catch (error: unknown) {
+			if (error instanceof ArticleNotInDatasetError) {
+				console.log(`Article ${pmcId} is not in the PMC Article Datasets and has no images to download.`);
+				handledIds.push(pmcId);
 				continue;
 			}
 
-			const pmcId = pmcIdObj._;
-			console.log(`Processing article PMC ID: ${pmcId}`);
-
-			// Create the output directory for species and PMC ID
-			const outputDir = path.join(__dirname, "../output", species, pmcId);
-
-			try {
-				// Download complete article package and extract all images
-				await throttle(async () => await downloadArticlePackage(throttle, pmcId, outputDir));
-				console.log(`Successfully processed article package for ${pmcId}`);
-			} catch (error: unknown) {
-				const errorMessage = error instanceof Error ? error.message : String(error);
-				console.error(`Failed to download article package for ${pmcId}: ${errorMessage}`, { pmcId, species });
-
-				// Check if it's an Open Access issue
-				if (errorMessage.includes("Open Access subset")) {
-					console.log(`Article ${pmcId} is not in the Open Access subset and cannot be downloaded via FTP.`);
-				}
-			}
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.error(`Failed to download article images for ${pmcId}: ${errorMessage}`, { pmcId, species });
 		}
-	});
+	}
+
+	return handledIds;
 }

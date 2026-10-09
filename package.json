@@ -1,6 +1,6 @@
 {
 	"name": "publication-figure-retriever",
-	"version": "3.0.2",
+	"version": "3.1.0",
 	"description": "This tool provides a method for retrieving figures from NCBI's PubMed publications using NIH APIs for open access and publicly available publications.",
 	"main": "index.ts",
 	"scripts": {
@@ -26,15 +26,15 @@
 	"devDependencies": {
 		"@trivago/prettier-plugin-sort-imports": "^6.0.2",
 		"@types/jest": "^30.0.0",
-		"@types/node": "^26.4.1",
+		"@types/node": "^26.6.2",
 		"@types/xml2js": "^0.4.14",
-		"eslint": "^10.10.0",
+		"eslint": "^10.11.0",
 		"eslint-plugin-node": "^11.1.0",
 		"globals": "^17.12.0",
-		"jest": "^30.5.1",
-		"markdownlint-cli2": "^0.23.2",
-		"prettier": "^3.9.6",
-		"ts-jest": "^29.4.12",
+		"jest": "^30.5.2",
+		"markdownlint-cli2": "^0.23.3",
+		"prettier": "^3.9.9",
+		"ts-jest": "^29.4.14",
 		"typescript": "^6.0.3"
 	},
 	"contributors": [

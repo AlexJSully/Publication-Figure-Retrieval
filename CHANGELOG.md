@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 To see tags and releases, please go to [Tags](https://github.com/AlexJSully/Publication-Figure-Retrieval/tags) on [GitHub](https://github.com/AlexJSully/Publication-Figure-Retrieval).
 
+## [3.1.0] - 2026-10-09
+
+Feature:
+
+- Retrieved figures from the PMC Cloud Service after NCBI retired the PMC OA Web Service and FTP article packages in August 2026; each image is downloaded individually and verified against its MD5 checksum
+- Search queries include the `open_access` and `author_manuscript` filters
+
+Bug fix:
+
+- Fixed no figures being retrieved because every PMC OA Web Service lookup returned 404
+- Fixed articles being cached as processed before their downloads finished; failed articles are now retried on the next run
+
+Security:
+
+- Validated PMC IDs before use and removed shell-based archive extraction, preventing command injection and path traversal from crafted NCBI responses
+- Addressed CVE-2026-33228, CVE-2026-13149 and CVE-2026-84375 by updating npm packages
+- Required npm packages to be at least 14 days old before installation (`min-release-age=14` in `.npmrc`) to reduce supply chain risk
+
+Dependencies:
+
+- Upgraded TypeScript to v6
+- Replaced `markdownlint` with `markdownlint-cli2` for `npm run lint:markdown`
+- Removed `eslint-plugin-prettier` and `eslint-config-prettier`; Prettier runs on its own
+- Updated all other dependencies
+
 ## [3.0.2] - 2026-02-21
 
 Bug fix:

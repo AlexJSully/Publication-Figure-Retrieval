@@ -29,3 +29,18 @@ export const IMAGE_EXTENSION_PRIORITY: Record<string, number> = IMAGE_EXTENSIONS
 
 /** Regular expression pattern to match supported image file extensions. */
 export const IMAGE_EXTENSION_PATTERN = new RegExp(`\\.(${IMAGE_EXTENSIONS.join("|")})$`, "i");
+
+/** Regular expression pattern matching a PMC ID: digits, optionally prefixed with "PMC". */
+export const PMC_ID_PATTERN = /^(?:PMC)?\d+$/;
+
+/**
+ * Name of the public S3 bucket holding the PMC Article Datasets.
+ * @see https://pmc-oa-opendata.s3.amazonaws.com/README.txt
+ */
+export const PMC_CLOUD_BUCKET = "pmc-oa-opendata";
+
+/** HTTPS base URL of the PMC Cloud Service bucket, readable without credentials. */
+export const PMC_CLOUD_BASE_URL = `https://${PMC_CLOUD_BUCKET}.s3.amazonaws.com`;
+
+/** Milliseconds to wait for a PMC Cloud Service response. */
+export const PMC_CLOUD_REQUEST_TIMEOUT_MS = 30000;

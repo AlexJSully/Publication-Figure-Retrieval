@@ -51,8 +51,8 @@ export async function searchArticlesBySpecies(throttle: ThrottleFunction, specie
 #### NCBI E-search Endpoint
 
 ```typescript
-// Base URL construction
-const query = `${species}[organism]`;
+// Query construction with the open_access and author_manuscript filters.
+const query = `${species}[organism] AND (open_access[Filter] OR author_manuscript[Filter])`;
 const baseUrl = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi";
 const params = {
 	db: "pmc", // PubMed Central database
@@ -66,12 +66,12 @@ const params = {
 
 ```typescript
 // Human articles
-const humanQuery = "Homo_sapiens[organism]";
-// URL: ...esearch.fcgi?db=pmc&term=Homo_sapiens%5Borganism%5D&retmode=json&retmax=1000000
+const humanQuery = "Homo_sapiens[organism] AND (open_access[Filter] OR author_manuscript[Filter])";
+// URL: ...esearch.fcgi?db=pmc&term=Homo_sapiens%5Borganism%5D%20AND%20(open_access%5BFilter%5D%20OR%20author_manuscript%5BFilter%5D)&retmode=json&retmax=1000000
 
 // Plant model organism
-const plantQuery = "Arabidopsis_thaliana[organism]";
-// URL: ...esearch.fcgi?db=pmc&term=Arabidopsis_thaliana%5Borganism%5D&retmode=json&retmax=1000000
+const plantQuery = "Arabidopsis_thaliana[organism] AND (open_access[Filter] OR author_manuscript[Filter])";
+// URL: ...esearch.fcgi?db=pmc&term=Arabidopsis_thaliana%5Borganism%5D%20AND%20(open_access%5BFilter%5D%20OR%20author_manuscript%5BFilter%5D)&retmode=json&retmax=1000000
 ```
 
 ### Usage Examples
