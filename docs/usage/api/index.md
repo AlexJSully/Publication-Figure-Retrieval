@@ -8,11 +8,13 @@ The tool's processing pipeline is composed of five exported functions in the Typ
 - [`searchArticlesBySpecies`](../../../src/processor/searchArticleBySpecies.ts) in [`src/processor/searchArticleBySpecies.ts`](../../../src/processor/searchArticleBySpecies.ts)
 - [`fetchArticleDetails`](../../../src/processor/fetchArticleDetails.ts) in [`src/processor/fetchArticleDetails.ts`](../../../src/processor/fetchArticleDetails.ts)
 - [`parseFigures`](../../../src/processor/parseFigures.ts) in [`src/processor/parseFigures.ts`](../../../src/processor/parseFigures.ts)
-- [`downloadArticlePackage`](../../../src/processor/downloadArticlePackage.ts) in [`src/processor/downloadArticlePackage.ts`](../../../src/processor/downloadArticlePackage.ts)
+- [`downloadArticleImages`](../../../src/processor/downloadArticleImages.ts) in [`src/processor/downloadArticleImages.ts`](../../../src/processor/downloadArticleImages.ts)
 
-The package URL resolver used by the downloader is:
+The PMC Cloud Service metadata helpers used by the downloader and the cache are exported from [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts):
 
-- [`fetchPackageUrl`](../../../src/processor/fetchPackageUrl.ts) in [`src/processor/fetchPackageUrl.ts`](../../../src/processor/fetchPackageUrl.ts)
+- [`fetchArticleMetadata`](../../../src/processor/fetchArticleMetadata.ts)
+- [`withPmcPrefix`](../../../src/processor/fetchArticleMetadata.ts)
+- [`ArticleNotInDatasetError`](../../../src/processor/fetchArticleMetadata.ts)
 
 ## Execution Order
 
@@ -21,15 +23,16 @@ The package URL resolver used by the downloader is:
 3. `main` calls `fetchArticleDetails` when PMC IDs are returned
 4. `fetchArticleDetails` requests XML batches (50 IDs per batch) from EFetch
 5. `fetchArticleDetails` calls `parseFigures` with XML payloads
-6. `parseFigures` extracts PMC IDs and calls `downloadArticlePackage`
-7. `downloadArticlePackage` fetches the OA package URL, downloads the `.tar.gz`, extracts files, and copies selected image files to `build/output/[species]/[pmcid]/`
+6. `parseFigures` extracts PMC IDs and calls `downloadArticleImages` for one article at a time
+7. `downloadArticleImages` fetches the article's metadata from the PMC Cloud Service with `fetchArticleMetadata`, downloads each selected image, verifies its MD5 digest, and writes verified images to `build/output/[species]/[pmcid]/`
+8. `parseFigures` returns the PMC IDs it handled, and `fetchArticleDetails` adds the matching batch IDs to `build/output/cache/id.json`
 
 ## Pipeline Diagram
 
 ```mermaid
 flowchart TD
     accTitle: API Processing Pipeline
-    accDescr: Flow of function calls from main through species search, batched XML retrieval, XML parsing, package download, extraction, and cache updates.
+    accDescr: main loads species keys and calls searchArticlesBySpecies for each species. If no PMC IDs are returned it logs that and moves to the next species. Otherwise fetchArticleDetails reads the cache file, splits the IDs into batches of 50 and skips IDs already cached; a batch with no new IDs is skipped. For a batch with new IDs it requests EFetch XML and calls parseFigures, which awaits XML parsing and handles one article at a time. For each article it extracts the PMC ID and calls downloadArticleImages, which fetches the article metadata through the throttle by listing the PMC Cloud Service bucket for the highest article version and reading its metadata JSON. It selects one image per figure by extension priority, downloads each image, verifies its MD5 digest and writes verified images to build/output/species/pmcid. Articles whose images were all retrieved, and articles not in the PMC Article Datasets, are reported as handled; other failures are logged and left out. fetchArticleDetails then appends only the handled batch IDs to the cache file and continues with the next batch.
 
     A[main in src/index.ts] --> B[Load species keys from src/data/species.json]
     B --> C[searchArticlesBySpecies for each species]
@@ -44,15 +47,16 @@ flowchart TD
     J -->|Yes| L[Request EFetch XML]
     L --> M[parseFigures]
     M --> N[Extract PMC ID from article XML]
-    N --> O[downloadArticlePackage]
-    O --> P[fetchPackageUrl from OA service]
-    P --> Q[Download .tar.gz package]
-    Q --> R[Extract files and pick preferred image extension]
-    R --> S[Copy images to build/output/species/pmcid]
-    S --> T[Append batch IDs to cache file]
-    T --> K
-    E --> U[Next species]
-    K --> U
+    N --> O[downloadArticleImages]
+    O --> P[fetchArticleMetadata from PMC Cloud Service through throttle]
+    P --> Q[Select one image per figure by extension priority]
+    Q --> R[Download each image and verify MD5 digest]
+    R --> S[Write verified images to build/output/species/pmcid]
+    S --> T[parseFigures returns handled PMC IDs]
+    T --> U[Append handled batch IDs to cache file]
+    U --> K
+    E --> V[Next species]
+    K --> V
 ```
 
 ## Function Reference
@@ -69,7 +73,7 @@ flowchart TD
 
 - Location: [`src/processor/searchArticleBySpecies.ts`](../../../src/processor/searchArticleBySpecies.ts)
 - Behaviour:
-    - Builds an NCBI ESearch query with `term=<species>[organism]`
+    - Builds an NCBI ESearch query with `term=<species>[organism] AND (open_access[Filter] OR author_manuscript[Filter])`, which limits results to articles available in the PMC Article Datasets on the PMC Cloud Service
     - Calls `esearch.fcgi` with `db=pmc`, `retmode=json`, and `retmax=1000000`
     - Adds `api_key` when `NCBI_API_KEY` is present
     - Returns `response.data.esearchresult.idlist`
@@ -83,43 +87,60 @@ flowchart TD
     - Splits IDs into 50-item batches
     - Skips IDs already present in cache
     - Fetches article XML through `efetch.fcgi`
-    - Calls `parseFigures` for each fetched batch
-    - Appends processed IDs to cache
+    - Calls `parseFigures` for each fetched batch and waits for it to finish
+    - Appends to the cache only the batch IDs whose `PMC`-prefixed form (from `withPmcPrefix`) is in the list `parseFigures` returns, so failed articles are retried on the next run
+    - Caches nothing for a batch whose EFetch request fails
 
-### `parseFigures(throttle, xmlData, species): Promise<void>`
+### `parseFigures(throttle, xmlData, species): Promise<string[]>`
 
 - Location: [`src/processor/parseFigures.ts`](../../../src/processor/parseFigures.ts)
 - Behaviour:
-    - Parses XML with `xml2js`
+    - Parses XML with `xml2js` and awaits the result
+    - Returns `[]` when the XML cannot be parsed or contains no articles
     - Extracts each article's PMC ID from `article.front[0]["article-meta"][0]["article-id"]`
-    - Creates per-article output directories under `build/output`
-    - Calls `downloadArticlePackage` for each parsed PMC ID
-    - Continues processing when an individual article package fails
+    - Calls `downloadArticleImages` for each parsed PMC ID, one article at a time, with the output directory `build/output/<species>/<pmcid>`
+    - Returns the PMC IDs of articles whose images were retrieved and of articles that throw `ArticleNotInDatasetError`
+    - Logs any other failure and leaves that article out of the returned list, then continues with the next article
 
-### `downloadArticlePackage(throttle, pmcId, outputDir): Promise<string[]>`
+### `downloadArticleImages(throttle, pmcId, outputDir): Promise<string[]>`
 
-- Location: [`src/processor/downloadArticlePackage.ts`](../../../src/processor/downloadArticlePackage.ts)
+- Location: [`src/processor/downloadArticleImages.ts`](../../../src/processor/downloadArticleImages.ts)
 - Behaviour:
-    - Resolves OA package links via `fetchPackageUrl`
-    - Downloads a `.tar.gz` package stream
-    - Extracts package contents with `tar`
-    - Selects one image per basename using extension priority from [`src/constants.ts`](../../../src/constants.ts)
-    - Copies selected files into `outputDir`
-    - Removes temporary extraction files
-    - Returns extracted filenames
+    - Throws `Invalid PMC ID` unless the ID is `PMC` followed by digits, or digits alone (`PMC_ID_PATTERN` in [`src/constants.ts`](../../../src/constants.ts))
+    - Fetches the article metadata with `fetchArticleMetadata` inside the throttle
+    - Selects image media URLs in the `pmc-oa-opendata` bucket under the article version's own `<pmcid>.<version>/` prefix, keeping one file per figure basename by the extension priority in [`src/constants.ts`](../../../src/constants.ts)
+    - Logs `No images found for <id>.` and returns `[]` when no image is selected
+    - Downloads each selected image one at a time from `https://pmc-oa-opendata.s3.amazonaws.com`, outside the throttle
+    - Verifies each image against the MD5 digest in the media URL's `md5` query parameter and writes only verified images
+    - Creates `outputDir` only when the first verified image is written
+    - Throws `<n> of <m> images failed for <id>` if any image fails to download or verify; images already verified stay on disk
+    - Returns the file names of the images written
 
-### `fetchPackageUrl(pmcId): Promise<PackageInfo>`
+### `fetchArticleMetadata(pmcId): Promise<ArticleMetadata>`
 
-- Location: [`src/processor/fetchPackageUrl.ts`](../../../src/processor/fetchPackageUrl.ts)
+- Location: [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts)
 - Behaviour:
-    - Calls PMC OA service endpoint `https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi`
-    - Normalizes IDs to `PMC...`
-    - Parses XML response and extracts package links
-    - Converts `ftp://` link prefixes to `https://`
-    - Throws when article/package data is unavailable
+    - Normalizes the ID to `PMC...` with `withPmcPrefix`
+    - Lists the PMC Cloud Service bucket under the `<pmcid>.` prefix with an S3 `ListObjectsV2` request
+    - Picks the highest-numbered article version from the `<pmcid>.<version>/` prefixes
+    - Fetches `metadata/<pmcid>.<version>.json` from the bucket
+    - Throws `ArticleNotInDatasetError` when the article has no version in the PMC Article Datasets
+    - Throws `Failed to fetch metadata for <pmcid>: <message>` when a request to the bucket fails
+    - Uses a 30 second request timeout (`PMC_CLOUD_REQUEST_TIMEOUT_MS`)
+
+### `withPmcPrefix(pmcId): string`
+
+- Location: [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts)
+- Behaviour:
+    - Returns the ID unchanged when it starts with `PMC`, otherwise prefixes it with `PMC`
+
+### `ArticleNotInDatasetError`
+
+- Location: [`src/processor/fetchArticleMetadata.ts`](../../../src/processor/fetchArticleMetadata.ts)
+- Behaviour:
+    - Error class thrown when an article has no version in the PMC Article Datasets, with the message `Article <pmcid> is not in the PMC Article Datasets`
 
 ## Notes
 
 - `extractFigureUrls` in [`src/processor/extractFigureUrls.ts`](../../../src/processor/extractFigureUrls.ts) is currently a standalone utility and is not invoked by the active main pipeline.
-- `fetchPackageUrlsBatch` in [`src/processor/fetchPackageUrl.ts`](../../../src/processor/fetchPackageUrl.ts) is also exported but not invoked by the active main pipeline; the pipeline uses `fetchPackageUrl` for one article at a time.
-- Cache file format is a JSON array of PMC ID strings, not an object.
+- Cache file format is a JSON array of ID strings, stored exactly as they were passed to `fetchArticleDetails` (the ESearch `idlist` values), not an object.

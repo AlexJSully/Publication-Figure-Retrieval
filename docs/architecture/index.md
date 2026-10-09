@@ -9,7 +9,7 @@ The Publication Figure Retrieval Tool follows a modular, pipeline-based architec
 ```mermaid
 graph TB
     accTitle: High-Level System Architecture
-    accDescr: Inputs (species configuration, environment variables, and API keys) feed the main orchestrator, which drives the search, fetch, parse, and download modules. The search and fetch modules call the NCBI E-utilities API and PMC database. The download module writes to the output file system, cache, and progress tracking. A throttled queue mediates the search, fetch, and download API requests under an API rate controller.
+    accDescr: Inputs (species configuration, environment variables, and API keys) feed the main orchestrator, which drives the search, fetch, parse, and download modules. The search and fetch modules call the NCBI E-utilities API and PMC database. The download module reads article metadata and images from the PMC Cloud Service and writes verified images to the output file system and progress tracking, while the fetch module writes handled PMC IDs to the cache. A throttled queue mediates the search and fetch requests and the download module's metadata requests under an API rate controller; image downloads do not go through the queue.
 
     subgraph "Input Layer"
         A[Species Configuration]
@@ -28,6 +28,7 @@ graph TB
     subgraph "External APIs"
         I[NCBI E-utilities API]
         J[PMC Database]
+        P[PMC Cloud Service]
     end
 
     subgraph "Storage Layer"
@@ -55,9 +56,11 @@ graph TB
 
     F --> G
     G --> H
+    H --> P
+    P --> H
 
     H --> K
-    H --> L
+    F --> L
     H --> M
 
     N --> E
@@ -104,14 +107,14 @@ Handles publication discovery through NCBI's E-utilities API:
 ```mermaid
 sequenceDiagram
     accTitle: Search Module Request Sequence
-    accDescr: The search module constructs a query string and sends a GET request to the NCBI esearch endpoint with the PMC database and species term. The API returns a JSON response containing PMC IDs. The module extracts the ID list and returns the PMC ID array to the caller.
+    accDescr: The search module constructs a query string of the species organism term limited by the open_access or author_manuscript filters, and sends a GET request to the NCBI esearch endpoint with the PMC database and that term. The API returns a JSON response containing PMC IDs. The module extracts the ID list and returns the PMC ID array to the caller.
 
     participant SM as Search Module
     participant API as NCBI E-utilities
     participant Cache as Local Cache
 
     SM->>SM: Construct Query String
-    SM->>API: GET esearch.fcgi?db=pmc&term=species
+    SM->>API: GET esearch.fcgi?db=pmc&term=species query
     API-->>SM: JSON Response with PMC IDs
     SM->>SM: Extract ID List
     SM-->>Cache: Return PMC ID Array
@@ -120,8 +123,8 @@ sequenceDiagram
 **Search Query Construction:**
 
 ```typescript
-// Example query construction
-const query = `${species}[organism]`;
+// Query construction, limited to articles in the PMC Article Datasets
+const query = `${species}[organism] AND (open_access[Filter] OR author_manuscript[Filter])`;
 const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(query)}&retmode=json&retmax=1000000`;
 ```
 
@@ -134,40 +137,44 @@ Retrieves detailed article metadata and content:
 ```mermaid
 graph TD
     accTitle: Fetch Module Batch Processing
-    accDescr: The fetch module batches PMC IDs and checks the cache. Already-cached batches are skipped, while uncached batches are fetched as article details, parsed from XML, and recorded in the cache before figures are processed. Each batch leads to the next until all are handled.
+    accDescr: The fetch module batches PMC IDs and checks the cache. A batch whose IDs are all cached is skipped. Otherwise the uncached IDs are fetched as article details, and the XML response is handed to parseFigures, which processes each article's figures and returns the PMC IDs it handled. Only the batch IDs that match a handled PMC ID are recorded in the cache, so failed articles are retried on the next run. Each batch leads to the next until all are handled.
 
     A[Batch PMC IDs] --> B[Check Cache]
-    B --> C{Already Cached?}
+    B --> C{All IDs Cached?}
     C -->|Yes| D[Skip Batch]
-    C -->|No| E[Fetch Article Details]
-    E --> F[Parse XML Response]
-    F --> G[Update Cache]
-    G --> H[Process Figures]
+    C -->|No| E[Fetch Article Details for Uncached IDs]
+    E --> F[Parse XML and Process Figures]
+    F --> G[Add Handled IDs to Cache]
     D --> I[Next Batch]
-    H --> I
+    G --> I
 ```
 
 **Batch Processing Strategy:**
 
 - Processes PMC IDs in batches of 50
 - Implements caching to avoid redundant API calls
+- Caches only the IDs `parseFigures` reports as handled, so failed articles are retried on the next run
 - Handles network errors gracefully
 
 ### 4. Parse Module (`src/processor/parseFigures.ts`)
 
-Processes XML article data to extract PMC IDs and orchestrate package downloads:
+Processes XML article data to extract PMC IDs and orchestrate image downloads, one article at a time:
 
 ```mermaid
 graph LR
-    accTitle: Parse Module Figure Extraction
-    accDescr: The parse module takes XML article data, parses its structure, extracts the article metadata, locates the PMC ID, requests the article package, extracts images from the package, and saves the images to the file system.
+    accTitle: Parse Module Article Processing
+    accDescr: The parse module takes XML article data, awaits parsing of its structure, extracts the article metadata, and locates the PMC ID of each article in turn. It calls downloadArticleImages for the article. If the images are retrieved, or the article is not in the PMC Article Datasets, the PMC ID is recorded as handled. Any other failure is logged and the article is left out. After the last article the module returns the handled PMC IDs.
 
         A[XML Article Data] --> B[Parse XML Structure]
         B --> C[Extract Article Metadata]
         C --> D[Locate PMC ID]
-        D --> E[Request Article Package]
-        E --> F[Extract Images from Package]
-        F --> G[Save Images to File System]
+        D --> E[downloadArticleImages]
+        E --> F{Outcome}
+        F -->|Images retrieved| G[Record PMC ID as Handled]
+        F -->|Not in PMC Article Datasets| G
+        F -->|Other failure| H[Log Error and Leave Out]
+        G --> I[Return Handled PMC IDs]
+        H --> I
 ```
 
 **XML Structure Navigation (PMC ID extraction):**
@@ -186,17 +193,19 @@ The parser locates the PMC identifier in the article front matter (see implement
 </pmc-articleset>
 ```
 
-### 5. Download Module (`src/processor/downloadArticlePackage.ts`)
+### 5. Download Module (`src/processor/downloadArticleImages.ts`)
 
-Downloads a complete PMC article package (.tar.gz) and extracts image files. The implementation fetches a package URL from the OA Web Service API, downloads the archive, extracts media, and selects the highest-priority image format per basename before copying results to the output directory (see implementation: [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
+Downloads an article's figure images as individual files from the PMC Cloud Service, the public S3 bucket `pmc-oa-opendata` that holds the PMC Article Datasets (see [`src/constants.ts`](../../src/constants.ts)). NLM announced that from August 2026 the PMC Cloud Service is the primary source for PMC Article Datasets files: the PMC OA Web Service API is no longer available, the PMC Article Datasets files are removed from the PMC FTP Service, and the new structure has no compressed packages (see the [NLM Technical Bulletin](https://www.nlm.nih.gov/pubs/techbull/jf26/jf26_Changes_to_PMC_ArtDsDistribServs_2026.html), the [PMC OA Web Service page](https://pmc.ncbi.nlm.nih.gov/tools/oa-service/), and the [PMC Cloud Service documentation](https://pmc.ncbi.nlm.nih.gov/tools/pmcaws/)).
 
 Key implementation behaviours (implementation proof):
 
-- Fetches OA package metadata via the OA API and converts FTP links to HTTPS (see [`src/processor/fetchPackageUrl.ts`](../../src/processor/fetchPackageUrl.ts)).
-- Downloads the package archive and extracts it to a temporary directory (see [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
-- Groups files by basename and keeps the highest-priority extension using the `IMAGE_EXTENSIONS` priority map (see [`src/constants.ts`](../../src/constants.ts)).
+- Rejects a PMC ID that is not `PMC` followed by digits, or digits alone, before using it in a file path (see [`src/processor/downloadArticleImages.ts`](../../src/processor/downloadArticleImages.ts)).
+- Fetches the metadata of the highest-numbered article version through the throttle: the bucket is listed under the `<PMCID>.` prefix and `metadata/<PMCID>.<version>.json` is read. An article with no version raises `ArticleNotInDatasetError` (see [`src/processor/fetchArticleMetadata.ts`](../../src/processor/fetchArticleMetadata.ts)).
+- Selects image media URLs under the article version's own `<PMCID>.<version>/` prefix and keeps one file per figure basename using the `IMAGE_EXTENSIONS` priority map (see [`src/constants.ts`](../../src/constants.ts)).
+- Downloads each selected image one at a time, outside the throttle, and checks it against the MD5 digest in the media URL's `md5` query parameter. Only verified images are written, and the output directory is created when the first one is written (see [`src/processor/downloadArticleImages.ts`](../../src/processor/downloadArticleImages.ts)).
+- Throws `<n> of <m> images failed for <PMCID>` if any image fails to download or verify; images already verified stay on disk.
 
-Console-level messages written by the implementation include `Fetching package URL for <PMCID>`, `Package downloaded. Extracting images...`, `Extracted image: <filename>`, and `Successfully extracted <N> images from package.` (see [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts)).
+Console-level messages written by the implementation include `Fetching metadata for <PMCID>...`, `Downloaded image: <filename>`, `No images found for <PMCID>.`, and `Successfully downloaded <N> images for <PMCID>.` (see [`src/processor/downloadArticleImages.ts`](../../src/processor/downloadArticleImages.ts)).
 
 ## Data Flow Architecture
 
@@ -205,7 +214,7 @@ Console-level messages written by the implementation include `Fetching package U
 ```mermaid
 graph TD
     accTitle: Primary Data Pipeline
-    accDescr: The species list generates species queries that drive the PMC search and article-detail API calls. Responses are parsed from XML, the PMC ID is extracted, the article package is requested and its images extracted. Output directories are created and images written to the file system. A progress cache records completed work, and resume logic skips already-processed PMC IDs when fetching article details.
+    accDescr: The species list generates species queries that drive the PMC search and article-detail API calls. Responses are parsed from XML, the PMC ID is extracted, the article metadata is fetched from the PMC Cloud Service, and each selected image is downloaded and checked against its MD5 digest. The output directory is created on the first verified image and images are written to the file system. A progress cache records handled articles, and resume logic skips already-processed PMC IDs when fetching article details.
 
     subgraph "Input Processing"
         A[Species List] --> B[Species Query Generation]
@@ -219,8 +228,8 @@ graph TD
     subgraph "Content Processing"
         D --> E[XML Parsing]
         E --> F[PMC ID Extraction]
-        F --> G[Request Article Package]
-        G --> H[Extract Images from Package]
+        F --> G[Fetch Article Metadata from PMC Cloud Service]
+        G --> H[Download Images and Verify MD5]
     end
 
     subgraph "File Operations"
@@ -240,17 +249,17 @@ graph TD
 ```mermaid
 graph TD
     accTitle: Error Handling and Continuation Flow
-    accDescr: When an operation runs, the tool checks whether an error occurred. If not, processing continues. If an error occurs, the tool classifies where it happened. A species search error is logged with console.error and returns an empty array. An article batch fetch error is logged and processing continues with the next batch. An article package error is logged and processing continues with the next article, with an extra log when the message mentions the Open Access subset. The tool does not retry or apply backoff.
+    accDescr: When an operation runs, the tool checks whether an error occurred. If not, processing continues. If an error occurs, the tool classifies where it happened. A species search error is logged with console.error and returns an empty array. An article batch fetch error is logged, nothing from the batch is cached, and processing continues with the next batch. When an article's images cannot be retrieved, the tool checks whether the article is missing from the PMC Article Datasets. If it is, the tool logs that with console.log and counts the article as handled so it is cached. Any other article error is logged with console.error, the article is left out of the cache, and processing continues with the next article. The tool does not retry or apply backoff within a run; uncached articles are retried on the next run.
 
     A[Operation Start] --> B{Error Occurred?}
     B -->|No| C[Continue Processing]
     B -->|Yes| D{Where did it occur?}
     D -->|Species search| E[console.error and return empty array]
-    D -->|Article batch fetch| F[console.error and continue next batch]
-    D -->|Article package| G[console.error and continue next article]
-    G --> H{Message mentions Open Access subset?}
-    H -->|Yes| I[Log article not in Open Access subset]
-    H -->|No| C
+    D -->|Article batch fetch| F[console.error, cache nothing, continue next batch]
+    D -->|Article images| G{Article not in PMC Article Datasets?}
+    G -->|Yes| H[console.log and count article as handled]
+    G -->|No| I[console.error, leave article uncached, continue next article]
+    H --> C
     I --> C
     E --> C
     F --> C
@@ -289,13 +298,14 @@ graph LR
 - Uses `throttled-queue` library for precise control
 - Configurable based on API key availability
 - Prevents API violations and ensures sustainable usage
+- Applies to ESearch and EFetch requests and to each article's metadata lookup on the PMC Cloud Service, where the bucket listing and the metadata request share one throttled call; image downloads do not go through the queue
 
 ### 3. Caching and Resume Capability
 
 ```mermaid
 graph TB
     accTitle: Caching and Resume Capability
-    accDescr: At process start the tool checks for the cache file. If it exists, the cached PMC IDs are loaded; if not, an empty cache is initialized. New PMC IDs are filtered from the cache, processed, and the cache is updated and saved to disk.
+    accDescr: At process start the tool checks for the cache file. If it exists, the cached PMC IDs are loaded; if not, an empty cache is initialized. New PMC IDs are filtered from the cache and processed, then only the IDs of handled articles are added to the cache, which is saved to disk. Articles that failed stay uncached and are retried on the next run.
 
     A[Process Start] --> B[Check Cache File]
     B --> C{Cache Exists?}
@@ -304,7 +314,7 @@ graph TB
     D --> F[Filter New PMC IDs]
     E --> F
     F --> G[Process New PMC IDs]
-    G --> H[Update Cache]
+    G --> H[Add Handled PMC IDs to Cache]
     H --> I[Save Cache to Disk]
 ```
 
@@ -314,8 +324,9 @@ The system logs operation-level failures and continues processing subsequent spe
 
 1. **Search failures**: `searchArticlesBySpecies` returns an empty list on request failures
 2. **Batch fetch failures**: `fetchArticleDetails` logs batch-level errors and continues with remaining batches
-3. **Package failures**: `parseFigures` logs package-level failures and continues with remaining articles
-4. **Filesystem setup**: output/cache directories are created on demand before writes
+3. **Article failures**: `parseFigures` logs article-level failures, leaves those articles out of the IDs it returns so they are not cached, and continues with remaining articles. An article that is not in the PMC Article Datasets is logged and counted as handled.
+4. **Image failures**: `downloadArticleImages` logs each image that fails to download or verify, continues with the remaining images, and then throws so the article is retried on the next run
+5. **Filesystem setup**: the cache directory is created when the cache file is missing, and an article's output directory is created when its first verified image is written
 
 ## Performance Considerations
 
@@ -337,8 +348,8 @@ graph TD
 ### Concurrent Operations
 
 - **Single-threaded** design for API compliance
-- **Sequential processing** to respect rate limits
-- **Asynchronous I/O** for file operations
+- **Sequential processing** to respect rate limits: articles are processed one at a time, and each article's images are downloaded one at a time
+- **Synchronous file writes** for images and the cache file
 
 ### Storage Optimization
 

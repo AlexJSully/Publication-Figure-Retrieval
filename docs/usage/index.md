@@ -57,8 +57,8 @@ The tool will:
 1. **Load species configuration** from [`src/data/species.json`](../../src/data/species.json)
 2. **Initialize rate limiting** (3 requests/second without API key)
 3. **Process each species** sequentially
-4. **Download article packages and extract images** into `build/output/[species]/[pmcid]/` (see [`src/processor/parseFigures.ts`](../../src/processor/parseFigures.ts) and [`src/processor/downloadArticlePackage.ts`](../../src/processor/downloadArticlePackage.ts))
-5. **Cache progress** for resume capability
+4. **Download article images** from the PMC Cloud Service into `build/output/[species]/[pmcid]/`, writing only images that match the MD5 digest in the article metadata (see [`src/processor/parseFigures.ts`](../../src/processor/parseFigures.ts) and [`src/processor/downloadArticleImages.ts`](../../src/processor/downloadArticleImages.ts))
+5. **Cache progress** for resume capability, recording only articles that were handled so failed articles are retried on the next run
 
 ### Example Output
 
@@ -66,13 +66,11 @@ The tool will:
 Searching articles for the species: Arabidopsis_thaliana...
 Fetching Arabidopsis thaliana article details for batch 1-50...
 Processing article PMC ID: PMC123456
-Fetching package URL for PMC123456...
-Downloading package from https://.../PMC123456.tar.gz...
-Package downloaded. Extracting images...
-Extracted image: figure1.jpg (priority: jpg)
-Extracted image: figure2.png (priority: png)
-Successfully extracted 2 images from package.
-Successfully processed article package for PMC123456
+Fetching metadata for PMC123456...
+Downloaded image: figure1.jpg
+Downloaded image: figure2.png
+Successfully downloaded 2 images for PMC123456.
+Successfully processed article images for PMC123456
 ```
 
 ## Configuration Options
@@ -164,6 +162,7 @@ The tool automatically:
 - Reads the cache file (`build/output/cache/id.json`)
 - Skips already processed PMC IDs
 - Continues from where it left off
+- Retries articles that failed on an earlier run, since only handled articles are cached
 
 ### 3. Process Large Species Lists
 
@@ -217,18 +216,19 @@ graph TD
 ```mermaid
 sequenceDiagram
     accTitle: Comparative Analysis Workflow
-    accDescr: A researcher configures target species and the tool searches PMC for articles. PMC returns article lists, the tool downloads figures, and PMC returns figure files. The tool hands the researcher an organized figure dataset, which the researcher loads into analysis software to obtain comparative results.
+    accDescr: A researcher configures target species and the tool searches PMC for articles. PMC returns article lists, the tool downloads figures from the PMC Cloud Service, and the PMC Cloud Service returns figure files. The tool hands the researcher an organized figure dataset, which the researcher loads into analysis software to obtain comparative results.
 
     participant R as Researcher
     participant T as Tool
     participant PMC as PMC Database
+    participant Cloud as PMC Cloud Service
     participant A as Analysis Software
 
     R->>T: Configure target species
     T->>PMC: Search for articles
     PMC-->>T: Return article lists
-    T->>PMC: Download figures
-    PMC-->>T: Figure files
+    T->>Cloud: Download figures
+    Cloud-->>T: Figure files
     T-->>R: Organized figure dataset
     R->>A: Load figures for analysis
     A-->>R: Comparative results
@@ -285,7 +285,7 @@ df -h build/output/
 ### Progress Monitoring
 
 ```bash
-# Count processed articles
+# Count articles with at least one downloaded image (an article's folder is created when its first image is written)
 find build/output -name "PMC*" -type d | wc -l
 
 # Count downloaded figures

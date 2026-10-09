@@ -6,6 +6,8 @@ import type { ThrottleFunction } from "../types";
  *
  * This function constructs an organism query for the specified species and calls
  * the NCBI E-utilities ESearch API (`db=pmc`, `retmode=json`, `retmax=1000000`).
+ * The query is limited by the `open_access` and `author_manuscript` filters to articles
+ * available in the PMC Article Datasets on the PMC Cloud Service.
  * When `NCBI_API_KEY` is set, it appends the key to the request.
  *
  * On request failures it logs the error and returns an empty array.
@@ -23,8 +25,8 @@ export async function searchArticlesBySpecies(
 	/** The species name to be used in the query. */
 	species: string,
 ): Promise<string[]> {
-	// Construct organism query for the species.
-	const query = `${species}[organism]`;
+	// Construct organism query for the species, limited to articles in the PMC Article Datasets.
+	const query = `${species}[organism] AND (open_access[Filter] OR author_manuscript[Filter])`;
 	let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(
 		query,
 	)}&retmode=json&retmax=1000000`;

@@ -76,6 +76,16 @@ export interface PMCArticleSet {
 	};
 }
 
+/** Metadata JSON for one article version in the PMC Cloud Service. */
+export interface ArticleMetadata {
+	/** PMC accession ID, e.g. "PMC4287867". */
+	pmcid: string;
+	/** Article version number; the version's objects sit under the "<pmcid>.<version>/" prefix. */
+	version: number;
+	/** S3 URLs of the version's images and supplementary files, each carrying an `md5` query parameter. */
+	media_urls?: string[];
+}
+
 /** Species data structure from species.json. */
 export interface SpeciesData {
 	[speciesKey: string]: {
