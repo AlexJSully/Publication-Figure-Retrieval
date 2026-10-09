@@ -51,6 +51,24 @@ describe("parseFigures", () => {
 		expect(logSpy).toHaveBeenCalledWith("Skipping article: PMC ID not found.");
 	});
 
+	it.each([
+		{ name: "no front matter", malformed: "<article><back/></article>" },
+		{
+			name: "an empty PMC ID",
+			malformed:
+				'<article><front><article-meta><article-id pub-id-type="pmcid"/></article-meta></front></article>',
+		},
+	])("skips an article with $name and still processes the rest of the batch", async ({ malformed }) => {
+		const xmlData =
+			`<pmc-articleset>${malformed}<article><front><article-meta>` +
+			'<article-id pub-id-type="pmcid">PMC123456</article-id>' +
+			"</article-meta></front></article></pmc-articleset>";
+
+		await expect(parseFigures(throttle, xmlData, "Homo sapiens")).resolves.toEqual(["PMC123456"]);
+
+		expect(logSpy).toHaveBeenCalledWith("Skipping article: PMC ID not found.");
+	});
+
 	it("logs and resolves with no IDs when the XML cannot be parsed", async () => {
 		await expect(parseFigures(throttle, "<badxml>", "Homo sapiens")).resolves.toEqual([]);
 

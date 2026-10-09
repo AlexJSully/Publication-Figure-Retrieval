@@ -15,6 +15,7 @@ describe("fetchArticleMetadata", () => {
 	it("returns the metadata of the highest article version", async () => {
 		mockedAxios.get.mockImplementation(
 			fakePmcCloud([
+				{ pmcid: "PMC123", version: 1, files: { "first.jpg": "first" } },
 				{ pmcid: "PMC123", version: 2, files: { "old.jpg": "old" } },
 				{ pmcid: "PMC123", version: 10, files: { "new.jpg": "new" } },
 			]) as typeof axios.get,

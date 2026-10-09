@@ -4,7 +4,6 @@ import path from "path";
 import { type FakeArticle, buildArticleSetXml, fakePmcCloud } from "../__fixtures__/pmcCloud";
 import { PMC_CLOUD_BASE_URL } from "../constants";
 import { fetchArticleDetails } from "./fetchArticleDetails";
-import { withPmcPrefix } from "./fetchArticleMetadata";
 
 jest.mock("axios");
 
@@ -26,7 +25,7 @@ describe("fetchArticleDetails", () => {
 			if (url.startsWith(efetchUrl)) {
 				const ids = new URL(url).searchParams.get("id")?.split(",") ?? [];
 
-				return { data: buildArticleSetXml(ids.map(withPmcPrefix)) };
+				return { data: buildArticleSetXml(ids.map((id) => `PMC${id}`)) };
 			}
 
 			return bucket(url, config);

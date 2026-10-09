@@ -58,7 +58,13 @@ describe("downloadArticleImages", () => {
 			{
 				pmcid: "PMC123",
 				version: 1,
-				files: { "gr1.gif": "gif bytes", "gr1.jpg": jpegBytes, "gr2.png": "png bytes", "mmc1.doc": "doc" },
+				files: {
+					"gr1.gif": "gif bytes",
+					"gr1.jpg": jpegBytes,
+					"gr2.png": "png bytes",
+					"gr2.gif": "gif bytes",
+					"mmc1.doc": "doc",
+				},
 			},
 		]);
 
@@ -68,6 +74,7 @@ describe("downloadArticleImages", () => {
 		expect(fs.readFileSync(path.join(outputDir, "gr1.jpg"))).toEqual(jpegBytes);
 		expect(fs.readFileSync(path.join(outputDir, "gr2.png"), "utf-8")).toBe("png bytes");
 		expect(requestedUrls()).not.toContain(`${PMC_CLOUD_BASE_URL}/PMC123.1/gr1.gif`);
+		expect(requestedUrls()).not.toContain(`${PMC_CLOUD_BASE_URL}/PMC123.1/gr2.gif`);
 		expect(requestedUrls()).not.toContain(`${PMC_CLOUD_BASE_URL}/PMC123.1/mmc1.doc`);
 	});
 

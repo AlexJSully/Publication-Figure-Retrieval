@@ -10,8 +10,6 @@ import { ArticleNotInDatasetError } from "./fetchArticleMetadata";
  * This function processes the provided XML data, extracts the PMC ID of each article, and downloads the
  * article's images from the PMC Cloud Service, one article at a time.
  *
- * Images are served as individual files listed in each article version's metadata.
- *
  * @returns {Promise<string[]>} A promise that resolves, once every article has been processed, with the PMC IDs
  * of the articles whose images were retrieved or which are not in the PMC Article Datasets. Articles that failed
  * for any other reason are left out so they can be retried.
@@ -55,19 +53,19 @@ export async function parseFigures(
 	const handledIds: string[] = [];
 
 	for (const article of articles) {
-		const pmcIdObj = article.front[0]["article-meta"][0]["article-id"].find(
-			(id) => id.$["pub-id-type"] === "pmc" || id.$["pub-id-type"] === "pmcid",
+		const pmcIdObj = article.front?.[0]?.["article-meta"]?.[0]?.["article-id"]?.find(
+			(id) => id.$?.["pub-id-type"] === "pmc" || id.$?.["pub-id-type"] === "pmcid",
 		);
 
-		if (!pmcIdObj) {
+		const pmcId = pmcIdObj?._;
+
+		if (!pmcId) {
 			console.log("Skipping article: PMC ID not found.");
 			continue;
 		}
 
-		const pmcId = pmcIdObj._;
 		console.log(`Processing article PMC ID: ${pmcId}`);
 
-		// Output directory for species and PMC ID; downloadArticleImages creates it only when an image is written
 		const outputDir = path.join(__dirname, "../output", species, pmcId);
 
 		try {
