@@ -43,12 +43,11 @@ graph TD
 ```mermaid
 sequenceDiagram
     accTitle: Species Search Pipeline
-    accDescr: The main loop calls the search module with a species name. The module constructs a query of the form species[organism] AND (open_access[Filter] OR author_manuscript[Filter]), which limits results to articles in the PMC Article Datasets, and sends a GET request to the NCBI esearch endpoint. The API returns a JSON response whose esearchresult.idlist holds the PMC IDs, which the module returns to the main loop. When no results are found it returns an empty array and the main loop logs that no articles were found.
+    accDescr: The main loop calls the search module with a species name. The module constructs a query of the form species[organism] AND (open_access[Filter] OR author_manuscript[Filter]) and sends a GET request to the NCBI esearch endpoint for the PMC database. The API returns a JSON response whose esearchresult.idlist holds the PMC IDs, which the module returns to the main loop. When no results are found it returns an empty array and the main loop logs that no articles were found.
 
     participant M as Main Loop
     participant S as Search Module
     participant API as NCBI E-search API
-    participant C as Cache System
 
     M->>S: searchArticlesBySpecies(species)
     S->>S: Construct Search Query
@@ -99,7 +98,7 @@ graph TD
 ```mermaid
 graph LR
     accTitle: XML Parsing and Image Download
-    accDescr: Raw XML data is parsed by xml2js into a JavaScript object, and parsing is awaited. The tool extracts the article array and handles one article at a time, getting its PMC ID. It lists the PMC Cloud Service bucket under the PMC ID prefix, picks the highest-numbered article version, and fetches that version's metadata JSON. From the metadata media URLs it selects the images under the version's own prefix, keeping the highest-priority extension per figure. It downloads each image, verifies its MD5 digest, creates the output directory on the first verified image, and writes the verified images. Finally the PMC ID is reported as handled so the caller can cache it.
+    accDescr: Raw XML data is parsed by xml2js into a JavaScript object, and parsing is awaited. The tool extracts the article array and handles one article at a time, getting its PMC ID. It lists the PMC Cloud Service bucket under the PMC ID prefix, picks the highest-numbered article version, and fetches that version's metadata JSON. From the metadata media URLs it selects the images under the version's own prefix, keeping the highest-priority extension per figure. It downloads each image, verifies its MD5 digest, creates the output directory on the first verified image, and writes the verified images. If no images are selected, the download call completes with an empty list; parseFigures reports that PMC ID as handled, as it does after a successful download.
 
     subgraph "XML Processing"
         A[Raw XML Data] --> B[xml2js Parser]
@@ -116,14 +115,15 @@ graph LR
         F --> G[List Bucket Under PMCID Prefix]
         G --> H[Pick Highest Article Version]
         H --> I[Fetch Version Metadata JSON]
-        I --> J[Select Highest-Priority Image Per Figure]
+        I --> J[Select Highest-Priority Image Per Figure] --> K{Any Images Selected?}
     end
 
     subgraph "Download Orchestration"
-        J --> K[Download Each Image]
-        K --> L[Verify MD5 Digest]
-        L --> M[Create Output Directory on First Write and Write Image]
-        M --> N[Report PMC ID as Handled]
+        K -->|Yes| L[Download Each Image]
+        L --> M[Verify MD5 Digest]
+        M --> N[Create Output Directory on First Write and Write Image]
+        N --> O[Report PMC ID as Handled]
+        K -->|No| O
     end
 ```
 

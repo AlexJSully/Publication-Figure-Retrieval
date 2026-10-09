@@ -11,8 +11,8 @@ import { ArticleNotInDatasetError } from "./fetchArticleMetadata";
  * article's images from the PMC Cloud Service, one article at a time.
  *
  * @returns {Promise<string[]>} A promise that resolves, once every article has been processed, with the PMC IDs
- * of the articles whose images were retrieved or which are not in the PMC Article Datasets. Articles that failed
- * for any other reason are left out so they can be retried.
+ * of articles whose image download completed, including those with no selected images, and articles that raise
+ * `ArticleNotInDatasetError`. Articles that fail for any other reason are left out so they can be retried.
  *
  * @example
  * const throttle = throttledQueue({ maxPerInterval: 2, interval: 1000 });

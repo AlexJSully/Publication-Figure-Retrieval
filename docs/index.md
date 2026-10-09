@@ -10,7 +10,7 @@ This tool is particularly valuable for researchers in bioinformatics, comparativ
 
 - **Educational and Historical Use Only**: This code is maintained primarily for educational and historical reference purposes
 - **NCBI Policy Compliance**: Usage must comply with NCBI's policies and rate limits
-- **PMC Article Datasets Only**: The tool only searches PMC articles with the `open_access` or `author_manuscript` filter, the articles available in the PMC Article Datasets on the PMC Cloud Service
+- **Article search**: ESearch queries include the `open_access` and `author_manuscript` filters. The retrieval pipeline checks for each article's version in the PMC Cloud Service before downloading images (see [`searchArticlesBySpecies`](../src/processor/searchArticleBySpecies.ts) and [`fetchArticleMetadata`](../src/processor/fetchArticleMetadata.ts)).
 - **Use at Your Own Risk**: Users are responsible for ensuring their usage complies with applicable policies and terms of service
 
 ## Key Features

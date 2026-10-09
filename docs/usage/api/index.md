@@ -33,7 +33,7 @@ The PMC Cloud Service metadata helpers used by the downloader and the cache are 
 ```mermaid
 flowchart TD
     accTitle: API Processing Pipeline
-    accDescr: main loads species keys and calls searchArticlesBySpecies for each species. If no PMC IDs are returned it logs that and moves to the next species. Otherwise fetchArticleDetails reads the cache file, splits the IDs into batches of 50 and skips IDs already cached; a batch with no new IDs is skipped. For a batch with new IDs it requests EFetch XML and calls parseFigures, which awaits XML parsing and handles one article at a time. For each article it extracts the PMC ID and calls downloadArticleImages, which fetches the article metadata through the throttle by listing the PMC Cloud Service bucket for the highest article version and reading its metadata JSON. It selects one image per figure by extension priority, downloads each image, verifies its MD5 digest and writes verified images to build/output/species/pmcid. Articles whose images were all retrieved, and articles not in the PMC Article Datasets, are reported as handled; other failures are logged and left out. fetchArticleDetails then appends only the handled batch IDs to the cache file and continues with the next batch.
+    accDescr: main loads species keys and calls searchArticlesBySpecies for each species. If no PMC IDs are returned it logs that and moves to the next species. Otherwise fetchArticleDetails reads the cache file, splits the IDs into batches of 50 and skips IDs already cached; a batch with no new IDs is skipped. For a batch with new IDs it requests EFetch XML and calls parseFigures, which awaits XML parsing and handles one article at a time. For each article it extracts the PMC ID and calls downloadArticleImages, which fetches the article metadata through the throttle by listing the PMC Cloud Service bucket for the highest article version and reading its metadata JSON. It selects one image per figure by extension priority, downloads each image, verifies its MD5 digest and writes verified images to build/output/species/pmcid. Articles whose image download completes, including articles with no selected images, and articles not in the PMC Article Datasets are reported as handled; other failures are logged and left out. fetchArticleDetails then appends only the handled batch IDs to the cache file and continues with the next batch.
 
     A[main in src/index.ts] --> B[Load species keys from src/data/species.json]
     B --> C[searchArticlesBySpecies for each species]
@@ -74,7 +74,7 @@ flowchart TD
 
 - Location: [`src/processor/searchArticleBySpecies.ts`](../../../src/processor/searchArticleBySpecies.ts)
 - Behaviour:
-    - Builds an NCBI ESearch query with `term=<species>[organism] AND (open_access[Filter] OR author_manuscript[Filter])`, which limits results to articles available in the PMC Article Datasets on the PMC Cloud Service
+    - Builds an NCBI ESearch query with `term=<species>[organism] AND (open_access[Filter] OR author_manuscript[Filter])`, using the `open_access` and `author_manuscript` filters
     - Calls `esearch.fcgi` with `db=pmc`, `retmode=json`, and `retmax=1000000`
     - Adds `api_key` when `NCBI_API_KEY` is present
     - Returns `response.data.esearchresult.idlist`
@@ -100,7 +100,7 @@ flowchart TD
     - Returns `[]` when the XML cannot be parsed or contains no articles
     - Extracts each article's PMC ID from `article.front[0]["article-meta"][0]["article-id"]`
     - Calls `downloadArticleImages` for each parsed PMC ID, one article at a time, with the output directory `build/output/<species>/<pmcid>`
-    - Returns the PMC IDs of articles whose images were retrieved and of articles that throw `ArticleNotInDatasetError`
+    - Returns the PMC IDs of articles whose image download completed, including those with no selected images, and of articles that throw `ArticleNotInDatasetError`
     - Logs any other failure and leaves that article out of the returned list, then continues with the next article
 
 ### `downloadArticleImages(throttle, pmcId, outputDir): Promise<string[]>`

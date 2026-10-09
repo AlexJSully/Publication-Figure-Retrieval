@@ -107,23 +107,23 @@ Handles publication discovery through NCBI's E-utilities API:
 ```mermaid
 sequenceDiagram
     accTitle: Search Module Request Sequence
-    accDescr: The search module constructs a query string of the species organism term limited by the open_access or author_manuscript filters, and sends a GET request to the NCBI esearch endpoint with the PMC database and that term. The API returns a JSON response containing PMC IDs. The module extracts the ID list and returns the PMC ID array to the caller.
+    accDescr: The search module constructs a species organism query with the open_access and author_manuscript filters, then sends a GET request to the NCBI esearch endpoint for the PMC database. The API returns a JSON response, and the module returns its ID list to the caller.
 
     participant SM as Search Module
     participant API as NCBI E-utilities
-    participant Cache as Local Cache
+    participant Main as Main Process
 
     SM->>SM: Construct Query String
     SM->>API: GET esearch.fcgi?db=pmc&term=species query
     API-->>SM: JSON Response with PMC IDs
     SM->>SM: Extract ID List
-    SM-->>Cache: Return PMC ID Array
+    SM-->>Main: Return PMC ID Array
 ```
 
 **Search Query Construction:**
 
 ```typescript
-// Query construction, limited to articles in the PMC Article Datasets
+// Query construction with the open_access and author_manuscript filters.
 const query = `${species}[organism] AND (open_access[Filter] OR author_manuscript[Filter])`;
 const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(query)}&retmode=json&retmax=1000000`;
 ```
@@ -163,7 +163,7 @@ Processes XML article data to extract PMC IDs and orchestrate image downloads, o
 ```mermaid
 graph LR
     accTitle: Parse Module Article Processing
-    accDescr: The parse module takes XML article data, awaits parsing of its structure, extracts the article metadata, and locates the PMC ID of each article in turn. It calls downloadArticleImages for the article. If the images are retrieved, or the article is not in the PMC Article Datasets, the PMC ID is recorded as handled. Any other failure is logged and the article is left out. After the last article the module returns the handled PMC IDs.
+    accDescr: The parse module awaits XML parsing, extracts each article's PMC ID, and calls downloadArticleImages. If that call resolves, including when no images are selected, or raises ArticleNotInDatasetError, parseFigures records the PMC ID as handled. Other failures are logged and omitted from the returned IDs.
 
         A[XML Article Data] --> B[Parse XML Structure]
         B --> C[Extract Article Metadata]
@@ -171,6 +171,7 @@ graph LR
         D --> E[downloadArticleImages]
         E --> F{Outcome}
         F -->|Images retrieved| G[Record PMC ID as Handled]
+        F -->|No images selected| G
         F -->|Not in PMC Article Datasets| G
         F -->|Other failure| H[Log Error and Leave Out]
         G --> I[Return Handled PMC IDs]

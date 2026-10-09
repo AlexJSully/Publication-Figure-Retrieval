@@ -51,7 +51,7 @@ export async function searchArticlesBySpecies(throttle: ThrottleFunction, specie
 #### NCBI E-search Endpoint
 
 ```typescript
-// Base URL construction, limited to articles in the PMC Article Datasets
+// Query construction with the open_access and author_manuscript filters.
 const query = `${species}[organism] AND (open_access[Filter] OR author_manuscript[Filter])`;
 const baseUrl = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi";
 const params = {

@@ -11,7 +11,7 @@ To see tags and releases, please go to [Tags](https://github.com/AlexJSully/Publ
 Feature:
 
 - Retrieved figures from the PMC Cloud Service after NCBI retired the PMC OA Web Service and FTP article packages in August 2026; each image is downloaded individually and verified against its MD5 checksum
-- Limited article searches to open access and author manuscript articles available in the PMC Article Datasets
+- Search queries include the `open_access` and `author_manuscript` filters
 
 Bug fix:
 

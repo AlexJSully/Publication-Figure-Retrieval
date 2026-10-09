@@ -82,7 +82,7 @@ export interface ArticleMetadata {
 	pmcid: string;
 	/** Article version number; the version's objects sit under the "<pmcid>.<version>/" prefix. */
 	version: number;
-	/** S3 URLs of the version's images and supplementary files, each carrying an `md5` query parameter. */
+	/** S3 URLs of the version's images and supplementary files; a URL may carry an `md5` query parameter. */
 	media_urls?: string[];
 }
 
